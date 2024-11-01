@@ -132,7 +132,7 @@ void LD_L_mHL(regs_t* regs) { LD_R8_mu8(regs->HL, &regs->L); } // 0x6E
 void LD_A_mHL(regs_t* regs) { LD_R8_mu8(regs->HL, &regs->A); } // 0x7E
 void LD_A_mBC(regs_t* regs) { LD_R8_mu8(regs->BC, &regs->A); } // 0x0A
 void LD_A_mDE(regs_t* regs) { LD_R8_mu8(regs->DE, &regs->A); } // 1x0A
-void LD_A_m16(regs_t* regs) { LD_R8_mu8(IM_U16, &regs->A); }   // Fx0A
+void LD_A_m16(regs_t* regs) { LD_R8_mu8(IM_U16, &regs->A); } // Fx0A
 
 /*      NOTE: maybe you mask the result of increment and decrement       */
 void LD_A_HLD(regs_t* regs) {
@@ -194,8 +194,10 @@ void set_flag(uint8_t* flag_reg, const uint8_t flag, const uint8_t value) {
     assert(value == 1 | value == 0 && flag <= 7 && flag >= 4);
     const uint8_t mask = flag;
     switch (value) {
-    case 1: *flag_reg |= mask; break;
-    case 0: *flag_reg &= ~mask; break;
+    case 1: *flag_reg |= mask;
+        break;
+    case 0: *flag_reg &= ~mask;
+        break;
     default: exit(69);
     }
 }
@@ -214,14 +216,14 @@ void ADD_R8(uint8_t* a_reg, uint8_t n, uint8_t* flag_reg) {
     set_flag(flag_reg, FLAG_C, bit7overflow ? 1 : 0);
 }
 
-void ADD_A_A(regs_t* regs) { ADD_R8(&regs->A, regs->A, &regs->F); }             // 8x07
-void ADD_A_B(regs_t* regs) { ADD_R8(&regs->A, regs->B, &regs->F); }             // 8x00
-void ADD_A_C(regs_t* regs) { ADD_R8(&regs->A, regs->C, &regs->F); }             // 8x01
-void ADD_A_D(regs_t* regs) { ADD_R8(&regs->A, regs->D, &regs->F); }             // 8x02
-void ADD_A_E(regs_t* regs) { ADD_R8(&regs->A, regs->E, &regs->F); }             // 8x03
-void ADD_A_H(regs_t* regs) { ADD_R8(&regs->A, regs->H, &regs->F); }             // 8x04
-void ADD_A_L(regs_t* regs) { ADD_R8(&regs->A, regs->L, &regs->F); }             // 8x05
-void ADD_A_8IM(regs_t* regs) { ADD_R8(&regs->A, IM_U8, &regs->F); }             // Cx06
+void ADD_A_A(regs_t* regs) { ADD_R8(&regs->A, regs->A, &regs->F); } // 8x07
+void ADD_A_B(regs_t* regs) { ADD_R8(&regs->A, regs->B, &regs->F); } // 8x00
+void ADD_A_C(regs_t* regs) { ADD_R8(&regs->A, regs->C, &regs->F); } // 8x01
+void ADD_A_D(regs_t* regs) { ADD_R8(&regs->A, regs->D, &regs->F); } // 8x02
+void ADD_A_E(regs_t* regs) { ADD_R8(&regs->A, regs->E, &regs->F); } // 8x03
+void ADD_A_H(regs_t* regs) { ADD_R8(&regs->A, regs->H, &regs->F); } // 8x04
+void ADD_A_L(regs_t* regs) { ADD_R8(&regs->A, regs->L, &regs->F); } // 8x05
+void ADD_A_8IM(regs_t* regs) { ADD_R8(&regs->A, IM_U8, &regs->F); } // Cx06
 void ADD_A_mHL(regs_t* regs) { ADD_R8(&regs->A, read_u8(regs->HL), &regs->F); } // 8x06
 
 // NOTE: the result of addition is masked, might be wrong
@@ -279,7 +281,7 @@ void ADC_A_H(regs_t* regs) { ADC_R8(&regs->A, regs->H, &regs->F); } // 8x0C
 void ADC_A_L(regs_t* regs) { ADC_R8(&regs->A, regs->L, &regs->F); } // 8x0D
 
 void ADC_A_mHL(regs_t* regs) { ADC_R8(&regs->A, read_u8(regs->HL), &regs->F); } // 8x0E
-void ADC_A_8IM(regs_t* regs) { ADC_R8(&regs->A, IM_U8, &regs->F); }             // Cx0E
+void ADC_A_8IM(regs_t* regs) { ADC_R8(&regs->A, IM_U8, &regs->F); } // Cx0E
 
 void SUB_R8(uint8_t* a_reg, uint8_t n, uint8_t* flag_reg) {
     const uint8_t a_value = *a_reg;
@@ -302,7 +304,7 @@ void SUB_A_H(regs_t* regs) { SUB_R8(&regs->A, regs->H, &regs->F); } // 9x04
 void SUB_A_L(regs_t* regs) { SUB_R8(&regs->A, regs->L, &regs->F); } // 9x05
 
 void SUB_A_mHL(regs_t* regs) { SUB_R8(&regs->A, read_u8(regs->HL), &regs->F); } // 9x06
-void SUB_A_8IM(regs_t* regs) { SUB_R8(&regs->A, IM_U8, &regs->F); }             // Dx06
+void SUB_A_8IM(regs_t* regs) { SUB_R8(&regs->A, IM_U8, &regs->F); } // Dx06
 
 void SBC_R8(uint8_t* a_reg, const uint8_t n, uint8_t* flag_reg) {
     const uint8_t a_value = *a_reg;
@@ -326,7 +328,7 @@ void SBC_A_H(regs_t* regs) { SBC_R8(&regs->A, regs->H, &regs->F); } // 9x0C
 void SBC_A_L(regs_t* regs) { SBC_R8(&regs->A, regs->L, &regs->F); } // 9x0D
 
 void SBC_A_mHL(regs_t* regs) { SBC_R8(&regs->A, read_u8(regs->HL), &regs->F); } // 9x0E
-void SBC_A_8IM(regs_t* regs) { SBC_R8(&regs->A, IM_U8, &regs->F); }             // Dx0E
+void SBC_A_8IM(regs_t* regs) { SBC_R8(&regs->A, IM_U8, &regs->F); } // Dx0E
 
 void CP_R8(const uint8_t a_value, const uint8_t n, uint8_t* flag_reg) {
     const uint16_t res = a_value - n;
@@ -347,7 +349,7 @@ void CP_A_H(regs_t* regs) { CP_R8(regs->A, regs->H, &regs->F); } // Bx0C
 void CP_A_L(regs_t* regs) { CP_R8(regs->A, regs->L, &regs->F); } // Bx0D
 
 void CP_A_mHL(regs_t* regs) { SBC_R8(&regs->A, read_u8(regs->HL), &regs->F); } // Bx0E
-void CP_A_8IM(regs_t* regs) { SBC_R8(&regs->A, IM_U8, &regs->F); }             // Fx0E
+void CP_A_8IM(regs_t* regs) { SBC_R8(&regs->A, IM_U8, &regs->F); } // Fx0E
 
 void AND_R8(uint8_t* a_reg, const uint8_t n, uint8_t* flag_reg) {
     const uint8_t res = *a_reg & n;
@@ -368,7 +370,7 @@ void AND_A_H(regs_t* regs) { AND_R8(&regs->A, regs->H, &regs->F); } // Ax04
 void AND_A_L(regs_t* regs) { AND_R8(&regs->A, regs->L, &regs->F); } // Ax05
 
 void AND_A_mHL(regs_t* regs) { SBC_R8(&regs->A, read_u8(regs->HL), &regs->F); } // Ax06
-void AND_A_8IM(regs_t* regs) { SBC_R8(&regs->A, IM_U8, &regs->F); }             // Ex06
+void AND_A_8IM(regs_t* regs) { SBC_R8(&regs->A, IM_U8, &regs->F); } // Ex06
 
 void XOR_R8(uint8_t* a_reg, const uint8_t n, uint8_t* flag_reg) {
     const uint8_t res = *a_reg ^ n;
@@ -389,7 +391,7 @@ void XOR_A_H(regs_t* regs) { XOR_R8(&regs->A, regs->H, &regs->F); } // Ax0C
 void XOR_A_L(regs_t* regs) { XOR_R8(&regs->A, regs->L, &regs->F); } // Ax0D
 
 void XOR_A_mHL(regs_t* regs) { XOR_R8(&regs->A, read_u8(regs->HL), &regs->F); } // Ax0E
-void XOR_A_8IM(regs_t* regs) { XOR_R8(&regs->A, IM_U8, &regs->F); }             // Ex0E
+void XOR_A_8IM(regs_t* regs) { XOR_R8(&regs->A, IM_U8, &regs->F); } // Ex0E
 
 void OR_R8(uint8_t* a_reg, const uint8_t n, uint8_t* flag_reg) {
     const uint8_t res = *a_reg | n;
@@ -410,7 +412,7 @@ void OR_A_H(regs_t* regs) { OR_R8(&regs->A, regs->H, &regs->F); } // Bx04
 void OR_A_L(regs_t* regs) { OR_R8(&regs->A, regs->L, &regs->F); } // Bx05
 
 void OR_A_mHL(regs_t* regs) { OR_R8(&regs->A, read_u8(regs->HL), &regs->F); } // Bx06
-void OR_A_8IM(regs_t* regs) { OR_R8(&regs->A, IM_U8, &regs->F); }             // Fx06
+void OR_A_8IM(regs_t* regs) { OR_R8(&regs->A, IM_U8, &regs->F); } // Fx06
 
 void INC_R8(uint8_t* reg, uint8_t* flag_reg) {
     const uint8_t value = *reg;
@@ -510,8 +512,8 @@ void PUSH_AF(regs_t* regs) { PUSH_R16(regs->AF, &regs->SP); } // Fx05
 // TODO IMPLEMENT THESE
 void RLCA(regs_t* regs) { regs->A = 0; } // 0x07
 void RRCA(regs_t* regs) { regs->A = 0; } // 0x0F
-void RLA(regs_t* regs) { regs->A = 0; }  // 1x07
-void RRA(regs_t* regs) { regs->A = 0; }  // 1x0F
+void RLA(regs_t* regs) { regs->A = 0; } // 1x07
+void RRA(regs_t* regs) { regs->A = 0; } // 1x0F
 
 void RLC_n(uint8_t* value, uint8_t* flag_reg) {
     const uint8_t carry = *value >> 7;
@@ -968,35 +970,19 @@ void SET_7_mHL(regs_t* regs) { SET_b_mem(regs->HL, 7); } // CXFE
 void JR_n(uint16_t* PC) { *PC += IM_I8; }
 
 void JR_8IM(regs_t* regs) { JR_n(&regs->PC); } // 1x08
-void JR_Z_8IM(regs_t* regs) {
-    if (regs->F & FLAG_Z) JR_n(&regs->PC);
-} // 2x08
-void JR_C_8IM(regs_t* regs) {
-    if (regs->F & FLAG_C) JR_n(&regs->PC);
-} // 3x08
-void JR_NZ_8IM(regs_t* regs) {
-    if (!(regs->F & FLAG_Z)) JR_n(&regs->PC);
-} // 2x00
-void JR_NC_8IM(regs_t* regs) {
-    if (!(regs->F & FLAG_C)) JR_n(&regs->PC);
-} // 3x00
+void JR_Z_8IM(regs_t* regs) { if (regs->F & FLAG_Z) JR_n(&regs->PC); } // 2x08
+void JR_C_8IM(regs_t* regs) { if (regs->F & FLAG_C) JR_n(&regs->PC); } // 3x08
+void JR_NZ_8IM(regs_t* regs) { if (!(regs->F & FLAG_Z)) JR_n(&regs->PC); } // 2x00
+void JR_NC_8IM(regs_t* regs) { if (!(regs->F & FLAG_C)) JR_n(&regs->PC); } // 3x00
 
 void JP_nn(uint16_t* PC) { *PC = IM_U16; }
 
-void JP_16IM(regs_t* regs) { JP_nn(&regs->PC); }  // Cx03
+void JP_16IM(regs_t* regs) { JP_nn(&regs->PC); } // Cx03
 void JP_HL(regs_t* regs) { regs->PC = regs->HL; } // Ex09
-void JP_Z_16IM(regs_t* regs) {
-    if (regs->F & FLAG_Z) JP_nn(&regs->PC);
-} // Cx0A
-void JP_C_16IM(regs_t* regs) {
-    if (regs->F & FLAG_C) JP_nn(&regs->PC);
-} // Dx0A
-void JP_NZ_16IM(regs_t* regs) {
-    if (!(regs->F & FLAG_Z)) JP_nn(&regs->PC);
-} // Cx02
-void JP_NC_16IM(regs_t* regs) {
-    if (!(regs->F & FLAG_C)) JP_nn(&regs->PC);
-} // Dx02
+void JP_Z_16IM(regs_t* regs) { if (regs->F & FLAG_Z) JP_nn(&regs->PC); } // Cx0A
+void JP_C_16IM(regs_t* regs) { if (regs->F & FLAG_C) JP_nn(&regs->PC); } // Dx0A
+void JP_NZ_16IM(regs_t* regs) { if (!(regs->F & FLAG_Z)) JP_nn(&regs->PC); } // Cx02
+void JP_NC_16IM(regs_t* regs) { if (!(regs->F & FLAG_C)) JP_nn(&regs->PC); } // Dx02
 
 void CALL(uint16_t* PC, uint16_t* SP) {
     PUSH_R16(*PC, SP);
@@ -1004,33 +990,17 @@ void CALL(uint16_t* PC, uint16_t* SP) {
 }
 
 void CALL_16IM(regs_t* regs) { CALL(&regs->PC, &regs->SP); } // Cx0D
-void CALL_C_16IM(regs_t* regs) {
-    if (regs->F & FLAG_C) { CALL_16IM(regs); }
-} // Dx0C
-void CALL_Z_16IM(regs_t* regs) {
-    if (!(regs->F & FLAG_Z)) { CALL_16IM(regs); }
-} // Cx0C
-void CALL_NZ_16IM(regs_t* regs) {
-    if (!(regs->F & FLAG_Z)) { CALL_16IM(regs); }
-} // Cx04
-void CALL_NC_16IM(regs_t* regs) {
-    if (!(regs->F & FLAG_C)) { CALL_16IM(regs); }
-} // Dx04
+void CALL_C_16IM(regs_t* regs) { if (regs->F & FLAG_C) { CALL_16IM(regs); } } // Dx0C
+void CALL_Z_16IM(regs_t* regs) { if (!(regs->F & FLAG_Z)) { CALL_16IM(regs); } } // Cx0C
+void CALL_NZ_16IM(regs_t* regs) { if (!(regs->F & FLAG_Z)) { CALL_16IM(regs); } } // Cx04
+void CALL_NC_16IM(regs_t* regs) { if (!(regs->F & FLAG_C)) { CALL_16IM(regs); } } // Dx04
 
 void RET(regs_t* regs) { POP_R16(&regs->PC, &regs->SP); } // Cx09
 
-void RET_C(regs_t* regs) {
-    if (regs->F & FLAG_C) { RET(regs); }
-} // Dx08
-void RET_Z(regs_t* regs) {
-    if (regs->F & FLAG_Z) { RET(regs); }
-} // Cx08
-void RET_NC(regs_t* regs) {
-    if (!(regs->F & FLAG_C)) { RET(regs); }
-} // Dx00
-void RET_NZ(regs_t* regs) {
-    if (!(regs->F & FLAG_Z)) { RET(regs); }
-} // Cx00
+void RET_C(regs_t* regs) { if (regs->F & FLAG_C) { RET(regs); } } // Dx08
+void RET_Z(regs_t* regs) { if (regs->F & FLAG_Z) { RET(regs); } } // Cx08
+void RET_NC(regs_t* regs) { if (!(regs->F & FLAG_C)) { RET(regs); } } // Dx00
+void RET_NZ(regs_t* regs) { if (!(regs->F & FLAG_Z)) { RET(regs); } } // Cx00
 
 void restart(const uint8_t addr, uint16_t* PC, uint16_t* SP) {
     PUSH_R16(*PC, SP);
@@ -1048,9 +1018,9 @@ void RST_38h(regs_t* regs) { restart(0x38, &regs->PC, &regs->SP); } // Fx0F
 
 void NOP(cpu_t* cpu) { cpu->regs.A = 0; } // 0x00
 
-void DI(cpu_t* cpu) { cpu->IME = 0; }        // Fx03
-void HALT(cpu_t* cpu) { cpu->halted = 1; }   // 7x06
-void STOP(cpu_t* cpu) { cpu->stopped = 1; }  // 1x00
+void DI(cpu_t* cpu) { cpu->IME = 0; } // Fx03
+void HALT(cpu_t* cpu) { cpu->halt = 1; } // 7x06
+void STOP(cpu_t* cpu) { cpu->stop = 1; } // 1x00
 void EI(cpu_t* cpu) { cpu->IME_enable = 1; } // Fx0B
 void RETI(cpu_t* cpu) {
     RET(&cpu->regs);
@@ -1088,7 +1058,7 @@ void CCF(regs_t* regs) {
     set_flag(&regs->F, FLAG_H, 0);
 } // 3x0F
 
-void PREFIX(cpu_t* cpu) { printf("%u", cpu->halted); } // Cx0B
+void PREFIX(cpu_t* cpu) { printf("%u", cpu->halt); } // Cx0B
 void UNKNOWN(regs_t* regs) {
     printf("Unknown opcode %u", regs->A);
     exit(69);
@@ -1106,12 +1076,9 @@ void UNKNOWN(regs_t* regs) {
 // void UNKNOWN(void); // Fx0C
 // void UNKNOWN(void); // Fx0D
 
-// static regs_t* regs;
-// static cpu_t* cpu;
-
 #define SET_OP(inst_ptr, opcode, handler, type, label, len, cycle1, cycle2)              \
     do {                                                                                 \
-        inst_ptr[opcode].execute = (context){.ctx_##type = &handler};                    \
+        inst_ptr[opcode].execute = (context_t){.ctx_##type = &handler};                    \
         inst_ptr[opcode].mnemonic = label;                                               \
         inst_ptr[opcode].length = len;                                                   \
         inst_ptr[opcode].cycle[0] = cycle1;                                              \
@@ -1120,550 +1087,550 @@ void UNKNOWN(regs_t* regs) {
 
 void InitOptable(inst_t* table) {
     SET_OP(table, 0x00, NOP, cpu, "NOP", 1, 4, 0);
-    SET_OP(table, 0x01, LD_BC_16IM, regs, "LD BC %i", 3, 12, 0);
-    SET_OP(table, 0x02, LD_mBC_A, regs, "LD  A", 1, 8, 0);
+    SET_OP(table, 0x01, LD_BC_16IM, regs, "LD BC $%x", 3, 12, 0);
+    SET_OP(table, 0x02, LD_mBC_A, regs, "LD $(BC) A", 1, 8, 0);
     SET_OP(table, 0x03, INC_BC, regs, "INC BC", 1, 8, 0);
     SET_OP(table, 0x04, INC_B, regs, "INC B", 1, 4, 0);
-    SET_OP(table, 0x05, DEC_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0x06, LD_B_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0x07, RLCA, regs, "", 1, 4, 0);
-    SET_OP(table, 0x08, LD_m16_SP, regs, "", 3, 20, 0);
-    SET_OP(table, 0x09, ADD_HL_BC, regs, "", 1, 8, 0);
-    SET_OP(table, 0x0A, LD_A_mBC, regs, "", 1, 8, 0);
-    SET_OP(table, 0x0B, DEC_BC, regs, "", 1, 8, 0);
-    SET_OP(table, 0x0C, INC_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x0D, DEC_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x0E, LD_C_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0x0F, RRCA, regs, "", 1, 4, 0);
+    SET_OP(table, 0x05, DEC_B, regs, "DEC B", 1, 4, 0);
+    SET_OP(table, 0x06, LD_B_8IM, regs, "LD B $%x", 2, 8, 0);
+    SET_OP(table, 0x07, RLCA, regs, "RLCA", 1, 4, 0);
+    SET_OP(table, 0x08, LD_m16_SP, regs, "LD $%x SP", 3, 20, 0);
+    SET_OP(table, 0x09, ADD_HL_BC, regs, "ADD HL BC", 1, 8, 0);
+    SET_OP(table, 0x0A, LD_A_mBC, regs, "LD A $(BC)", 1, 8, 0);
+    SET_OP(table, 0x0B, DEC_BC, regs, "DEC BC", 1, 8, 0);
+    SET_OP(table, 0x0C, INC_C, regs, "INC C", 1, 4, 0);
+    SET_OP(table, 0x0D, DEC_C, regs, "DEC C", 1, 4, 0);
+    SET_OP(table, 0x0E, LD_C_8IM, regs, "LD C $%x", 2, 8, 0);
+    SET_OP(table, 0x0F, RRCA, regs, "RRCA", 1, 4, 0);
 
     SET_OP(table, 0x10, STOP, cpu, "STOP", 1, 4, 0);
-    SET_OP(table, 0x11, LD_DE_16IM, regs, "", 3, 12, 0);
-    SET_OP(table, 0x12, LD_mDE_A, regs, "", 1, 8, 0);
-    SET_OP(table, 0x13, INC_DE, regs, "", 1, 8, 0);
-    SET_OP(table, 0x14, INC_D, regs, "", 1, 4, 0);
+    SET_OP(table, 0x11, LD_DE_16IM, regs, "LD DE $%x", 3, 12, 0);
+    SET_OP(table, 0x12, LD_mDE_A, regs, "LD $(DE) A", 1, 8, 0);
+    SET_OP(table, 0x13, INC_DE, regs, "INC DE", 1, 8, 0);
+    SET_OP(table, 0x14, INC_D, regs, "INC D", 1, 4, 0);
     SET_OP(table, 0x15, DEC_D, regs, "DEC D", 1, 4, 0);
-    SET_OP(table, 0x16, LD_D_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0x17, RLA, regs, "", 1, 4, 0);
-    SET_OP(table, 0x18, JR_8IM, regs, "", 2, 12, 0);
-    SET_OP(table, 0x19, ADD_HL_DE, regs, "", 1, 8, 0);
-    SET_OP(table, 0x1A, LD_A_mDE, regs, "", 1, 8, 0);
-    SET_OP(table, 0x1B, DEC_DE, regs, "", 1, 8, 0);
-    SET_OP(table, 0x1C, INC_E, regs, "", 1, 8, 0);
-    SET_OP(table, 0x1D, DEC_E, regs, "", 1, 8, 0);
-    SET_OP(table, 0x1E, LD_E_8IM, regs, "", 2, 8, 1);
-    SET_OP(table, 0x1F, RRA, regs, "", 1, 4, 0);
+    SET_OP(table, 0x16, LD_D_8IM, regs, "LD D $%x", 2, 8, 0);
+    SET_OP(table, 0x17, RLA, regs, "RLA", 1, 4, 0);
+    SET_OP(table, 0x18, JR_8IM, regs, "JR $%x", 2, 12, 0);
+    SET_OP(table, 0x19, ADD_HL_DE, regs, "ADD HL DE", 1, 8, 0);
+    SET_OP(table, 0x1A, LD_A_mDE, regs, "LD A $(DE)", 1, 8, 0);
+    SET_OP(table, 0x1B, DEC_DE, regs, "DEC DE", 1, 8, 0);
+    SET_OP(table, 0x1C, INC_E, regs, "INC E", 1, 8, 0);
+    SET_OP(table, 0x1D, DEC_E, regs, "DEC E", 1, 8, 0);
+    SET_OP(table, 0x1E, LD_E_8IM, regs, "LD E $%x", 2, 8, 1);
+    SET_OP(table, 0x1F, RRA, regs, "RRA", 1, 4, 0);
 
-    SET_OP(table, 0x20, JR_NZ_8IM, regs, "", 2, 8, 12);
-    SET_OP(table, 0x21, LD_HL_16IM, regs, "", 3, 12, 0);
-    SET_OP(table, 0x22, LD_HLI_A, regs, "", 1, 8, 0);
-    SET_OP(table, 0x23, INC_HL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x24, INC_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x25, DEC_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x26, LD_H_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0x27, DAA, regs, "", 1, 4, 0);
-    SET_OP(table, 0x28, JR_Z_8IM, regs, "", 2, 8, 12);
-    SET_OP(table, 0x29, ADD_HL_HL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x2A, LD_A_HLI, regs, "", 1, 8, 0);
-    SET_OP(table, 0x2B, DEC_HL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x2C, INC_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x2D, DEC_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x2E, LD_L_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0x2F, CPL, regs, "", 1, 4, 0);
+    SET_OP(table, 0x20, JR_NZ_8IM, regs, "JR NZ $%x", 2, 8, 12);
+    SET_OP(table, 0x21, LD_HL_16IM, regs, "LD HL $%x", 3, 12, 0);
+    SET_OP(table, 0x22, LD_HLI_A, regs, "LD $(HL+) A", 1, 8, 0);
+    SET_OP(table, 0x23, INC_HL, regs, "INC HL", 1, 8, 0);
+    SET_OP(table, 0x24, INC_H, regs, "INC H", 1, 4, 0);
+    SET_OP(table, 0x25, DEC_H, regs, "DEC H", 1, 4, 0);
+    SET_OP(table, 0x26, LD_H_8IM, regs, "LD H $%x", 2, 8, 0);
+    SET_OP(table, 0x27, DAA, regs, "DAA", 1, 4, 0);
+    SET_OP(table, 0x28, JR_Z_8IM, regs, "JR Z $%x", 2, 8, 12);
+    SET_OP(table, 0x29, ADD_HL_HL, regs, "ADD HL HL", 1, 8, 0);
+    SET_OP(table, 0x2A, LD_A_HLI, regs, "LD A $(HL+)", 1, 8, 0);
+    SET_OP(table, 0x2B, DEC_HL, regs, "DEC HL", 1, 8, 0);
+    SET_OP(table, 0x2C, INC_L, regs, "INC L", 1, 4, 0);
+    SET_OP(table, 0x2D, DEC_L, regs, "DEC L", 1, 4, 0);
+    SET_OP(table, 0x2E, LD_L_8IM, regs, "LD L %x", 2, 8, 0);
+    SET_OP(table, 0x2F, CPL, regs, "CPL", 1, 4, 0);
 
-    SET_OP(table, 0x30, JR_NC_8IM, regs, "", 2, 8, 12);
-    SET_OP(table, 0x31, LD_SP_16IM, regs, "", 3, 12, 0);
-    SET_OP(table, 0x32, LD_HLD_A, regs, "", 1, 8, 0);
-    SET_OP(table, 0x33, INC_SP, regs, "", 1, 8, 0);
-    SET_OP(table, 0x34, INC_mHL, regs, "", 1, 12, 0);
-    SET_OP(table, 0x35, DEC_mHL, regs, "", 1, 12, 0);
-    SET_OP(table, 0x36, LD_mHL_8IM, regs, "", 2, 12, 0);
-    SET_OP(table, 0x37, SCF, regs, "", 1, 4, 0);
-    SET_OP(table, 0x38, JR_C_8IM, regs, "", 2, 8, 12);
-    SET_OP(table, 0x39, ADD_HL_SP, regs, "", 1, 8, 0);
-    SET_OP(table, 0x3A, LD_A_HLD, regs, "", 1, 8, 0);
-    SET_OP(table, 0x3B, DEC_SP, regs, "", 1, 8, 0);
-    SET_OP(table, 0x3C, INC_A, regs, "", 1, 4, 0);
-    SET_OP(table, 0x3D, DEC_A, regs, "", 1, 4, 0);
-    SET_OP(table, 0x3E, LD_A_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0x3F, CCF, regs, "", 1, 4, 0);
+    SET_OP(table, 0x30, JR_NC_8IM, regs, "JR NC %x", 2, 8, 12);
+    SET_OP(table, 0x31, LD_SP_16IM, regs, "LD SP $%x", 3, 12, 0);
+    SET_OP(table, 0x32, LD_HLD_A, regs, "LD $(HL-) A", 1, 8, 0);
+    SET_OP(table, 0x33, INC_SP, regs, "INC SP", 1, 8, 0);
+    SET_OP(table, 0x34, INC_mHL, regs, "INC $(HL)", 1, 12, 0);
+    SET_OP(table, 0x35, DEC_mHL, regs, "DEC $(HL)", 1, 12, 0);
+    SET_OP(table, 0x36, LD_mHL_8IM, regs, "LD $(HL) $%x", 2, 12, 0);
+    SET_OP(table, 0x37, SCF, regs, "SCF", 1, 4, 0);
+    SET_OP(table, 0x38, JR_C_8IM, regs, "JR C $%x", 2, 8, 12);
+    SET_OP(table, 0x39, ADD_HL_SP, regs, "ADD HL SP", 1, 8, 0);
+    SET_OP(table, 0x3A, LD_A_HLD, regs, "LD A $(HL-)", 1, 8, 0);
+    SET_OP(table, 0x3B, DEC_SP, regs, "DEC SP", 1, 8, 0);
+    SET_OP(table, 0x3C, INC_A, regs, "INC A", 1, 4, 0);
+    SET_OP(table, 0x3D, DEC_A, regs, "DEC A", 1, 4, 0);
+    SET_OP(table, 0x3E, LD_A_8IM, regs, "LD A $%x", 2, 8, 0);
+    SET_OP(table, 0x3F, CCF, regs, "CCF", 1, 4, 0);
 
-    SET_OP(table, 0x40, LD_B_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0x41, LD_B_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x42, LD_B_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0x43, LD_B_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0x44, LD_B_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x45, LD_B_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x46, LD_B_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x47, LD_B_A, regs, "", 1, 4, 0);
-    SET_OP(table, 0x48, LD_C_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0x49, LD_C_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x4A, LD_C_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0x4B, LD_C_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0x4C, LD_C_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x4D, LD_C_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x4E, LD_C_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x4F, LD_C_A, regs, "", 1, 4, 0);
+    SET_OP(table, 0x40, LD_B_B, regs, "LD B B", 1, 4, 0);
+    SET_OP(table, 0x41, LD_B_C, regs, "LD B C", 1, 4, 0);
+    SET_OP(table, 0x42, LD_B_D, regs, "LD B D", 1, 4, 0);
+    SET_OP(table, 0x43, LD_B_E, regs, "LD B E", 1, 4, 0);
+    SET_OP(table, 0x44, LD_B_H, regs, "LD B H", 1, 4, 0);
+    SET_OP(table, 0x45, LD_B_L, regs, "LD B L", 1, 4, 0);
+    SET_OP(table, 0x46, LD_B_mHL, regs, "LD B $(HL)", 1, 8, 0);
+    SET_OP(table, 0x47, LD_B_A, regs, "LD B A", 1, 4, 0);
+    SET_OP(table, 0x48, LD_C_B, regs, "LD C B", 1, 4, 0);
+    SET_OP(table, 0x49, LD_C_C, regs, "LD C C", 1, 4, 0);
+    SET_OP(table, 0x4A, LD_C_D, regs, "LD C D", 1, 4, 0);
+    SET_OP(table, 0x4B, LD_C_E, regs, "LD C E", 1, 4, 0);
+    SET_OP(table, 0x4C, LD_C_H, regs, "LD C H", 1, 4, 0);
+    SET_OP(table, 0x4D, LD_C_L, regs, "LD C L", 1, 4, 0);
+    SET_OP(table, 0x4E, LD_C_mHL, regs, "LD C $(HL)", 1, 8, 0);
+    SET_OP(table, 0x4F, LD_C_A, regs, "LD C A", 1, 4, 0);
 
-    SET_OP(table, 0x50, LD_D_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0x51, LD_D_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x52, LD_D_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0x53, LD_D_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0x54, LD_D_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x55, LD_D_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x56, LD_D_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x57, LD_D_A, regs, "", 1, 4, 0);
-    SET_OP(table, 0x58, LD_E_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0x59, LD_E_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x5A, LD_E_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0x5B, LD_E_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0x5C, LD_E_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x5D, LD_E_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x5E, LD_E_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x5F, LD_E_A, regs, "", 1, 4, 0);
+    SET_OP(table, 0x50, LD_D_B, regs, "LD D B", 1, 4, 0);
+    SET_OP(table, 0x51, LD_D_C, regs, "LD D C", 1, 4, 0);
+    SET_OP(table, 0x52, LD_D_D, regs, "LD D D", 1, 4, 0);
+    SET_OP(table, 0x53, LD_D_E, regs, "LD D E", 1, 4, 0);
+    SET_OP(table, 0x54, LD_D_H, regs, "LD D H", 1, 4, 0);
+    SET_OP(table, 0x55, LD_D_L, regs, "LD D L", 1, 4, 0);
+    SET_OP(table, 0x56, LD_D_mHL, regs, "LD D $(HL)", 1, 8, 0);
+    SET_OP(table, 0x57, LD_D_A, regs, "LD D A", 1, 4, 0);
+    SET_OP(table, 0x58, LD_E_B, regs, "LD E B", 1, 4, 0);
+    SET_OP(table, 0x59, LD_E_C, regs, "LD E C", 1, 4, 0);
+    SET_OP(table, 0x5A, LD_E_D, regs, "LD E D", 1, 4, 0);
+    SET_OP(table, 0x5B, LD_E_E, regs, "LD E E", 1, 4, 0);
+    SET_OP(table, 0x5C, LD_E_H, regs, "LD E H", 1, 4, 0);
+    SET_OP(table, 0x5D, LD_E_L, regs, "LD E L", 1, 4, 0);
+    SET_OP(table, 0x5E, LD_E_mHL, regs, "LD E $(HL)", 1, 8, 0);
+    SET_OP(table, 0x5F, LD_E_A, regs, "LD E A", 1, 4, 0);
 
-    SET_OP(table, 0x60, LD_H_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0x61, LD_H_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x62, LD_H_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0x63, LD_H_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0x64, LD_H_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x65, LD_H_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x66, LD_H_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x67, LD_H_A, regs, "", 1, 4, 0);
-    SET_OP(table, 0x68, LD_L_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0x69, LD_L_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x6A, LD_L_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0x6B, LD_L_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0x6C, LD_L_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x6D, LD_L_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x6E, LD_L_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x6F, LD_L_A, regs, "", 1, 4, 0);
+    SET_OP(table, 0x60, LD_H_B, regs, "LD H B", 1, 4, 0);
+    SET_OP(table, 0x61, LD_H_C, regs, "LD H C", 1, 4, 0);
+    SET_OP(table, 0x62, LD_H_D, regs, "LD H D", 1, 4, 0);
+    SET_OP(table, 0x63, LD_H_E, regs, "LD H E", 1, 4, 0);
+    SET_OP(table, 0x64, LD_H_H, regs, "LD H H", 1, 4, 0);
+    SET_OP(table, 0x65, LD_H_L, regs, "LD H L", 1, 4, 0);
+    SET_OP(table, 0x66, LD_H_mHL, regs, "LD H $(HL)", 1, 8, 0);
+    SET_OP(table, 0x67, LD_H_A, regs, "LD H A", 1, 4, 0);
+    SET_OP(table, 0x68, LD_L_B, regs, "LD L B", 1, 4, 0);
+    SET_OP(table, 0x69, LD_L_C, regs, "LD L C", 1, 4, 0);
+    SET_OP(table, 0x6A, LD_L_D, regs, "LD L D", 1, 4, 0);
+    SET_OP(table, 0x6B, LD_L_E, regs, "LD L E", 1, 4, 0);
+    SET_OP(table, 0x6C, LD_L_H, regs, "LD L H", 1, 4, 0);
+    SET_OP(table, 0x6D, LD_L_L, regs, "LD L L", 1, 4, 0);
+    SET_OP(table, 0x6E, LD_L_mHL, regs, "LD L $(HL)", 1, 8, 0);
+    SET_OP(table, 0x6F, LD_L_A, regs, "LD L A", 1, 4, 0);
 
-    SET_OP(table, 0x70, LD_mHL_B, regs, "", 1, 8, 0);
-    SET_OP(table, 0x71, LD_mHL_C, regs, "", 1, 8, 0);
-    SET_OP(table, 0x72, LD_mHL_D, regs, "", 1, 8, 0);
-    SET_OP(table, 0x73, LD_mHL_E, regs, "", 1, 8, 0);
-    SET_OP(table, 0x74, LD_mHL_H, regs, "", 1, 8, 0);
-    SET_OP(table, 0x75, LD_mHL_L, regs, "", 1, 8, 0);
+    SET_OP(table, 0x70, LD_mHL_B, regs, "LD $(HL) B", 1, 8, 0);
+    SET_OP(table, 0x71, LD_mHL_C, regs, "LD $(HL) C", 1, 8, 0);
+    SET_OP(table, 0x72, LD_mHL_D, regs, "LD $(HL) D", 1, 8, 0);
+    SET_OP(table, 0x73, LD_mHL_E, regs, "LD $(HL) E", 1, 8, 0);
+    SET_OP(table, 0x74, LD_mHL_H, regs, "LD $(HL) H", 1, 8, 0);
+    SET_OP(table, 0x75, LD_mHL_L, regs, "LD $(HL) L", 1, 8, 0);
     SET_OP(table, 0x76, HALT, cpu, "HALT", 1, 4, 0);
-    SET_OP(table, 0x77, LD_mHL_A, regs, "", 1, 8, 0);
-    SET_OP(table, 0x78, LD_A_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0x79, LD_A_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x7A, LD_A_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0x7B, LD_A_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0x7C, LD_A_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x7D, LD_A_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x7E, LD_A_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x7F, LD_A_A, regs, "", 1, 4, 0);
+    SET_OP(table, 0x77, LD_mHL_A, regs, "LD $(HL) A", 1, 8, 0);
+    SET_OP(table, 0x78, LD_A_B, regs, "LD A B", 1, 4, 0);
+    SET_OP(table, 0x79, LD_A_C, regs, "LD A C", 1, 4, 0);
+    SET_OP(table, 0x7A, LD_A_D, regs, "LD A D", 1, 4, 0);
+    SET_OP(table, 0x7B, LD_A_E, regs, "LD A E", 1, 4, 0);
+    SET_OP(table, 0x7C, LD_A_H, regs, "LD A H", 1, 4, 0);
+    SET_OP(table, 0x7D, LD_A_L, regs, "LD A L", 1, 4, 0);
+    SET_OP(table, 0x7E, LD_A_mHL, regs, "LD A $(HL)", 1, 8, 0);
+    SET_OP(table, 0x7F, LD_A_A, regs, "LD A A", 1, 4, 0);
 
-    SET_OP(table, 0x80, ADD_A_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0x81, ADD_A_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x82, ADD_A_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0x83, ADD_A_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0x84, ADD_A_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x85, ADD_A_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x86, ADD_A_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x87, ADD_A_A, regs, "", 1, 4, 0);
-    SET_OP(table, 0x88, ADC_A_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0x89, ADC_A_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x8A, ADC_A_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0x8B, ADC_A_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0x8C, ADC_A_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x8D, ADC_A_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x8E, ADC_A_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x8F, ADC_A_A, regs, "", 1, 4, 0);
+    SET_OP(table, 0x80, ADD_A_B, regs, "ADD A B", 1, 4, 0);
+    SET_OP(table, 0x81, ADD_A_C, regs, "ADD A C", 1, 4, 0);
+    SET_OP(table, 0x82, ADD_A_D, regs, "ADD A D", 1, 4, 0);
+    SET_OP(table, 0x83, ADD_A_E, regs, "ADD A E", 1, 4, 0);
+    SET_OP(table, 0x84, ADD_A_H, regs, "ADD A H", 1, 4, 0);
+    SET_OP(table, 0x85, ADD_A_L, regs, "ADD A L", 1, 4, 0);
+    SET_OP(table, 0x86, ADD_A_mHL, regs, "ADD A $(HL)", 1, 8, 0);
+    SET_OP(table, 0x87, ADD_A_A, regs, "ADD A A", 1, 4, 0);
+    SET_OP(table, 0x88, ADC_A_B, regs, "ADC A B", 1, 4, 0);
+    SET_OP(table, 0x89, ADC_A_C, regs, "ADC A C", 1, 4, 0);
+    SET_OP(table, 0x8A, ADC_A_D, regs, "ADC A D", 1, 4, 0);
+    SET_OP(table, 0x8B, ADC_A_E, regs, "ADC A E", 1, 4, 0);
+    SET_OP(table, 0x8C, ADC_A_H, regs, "ADC A H", 1, 4, 0);
+    SET_OP(table, 0x8D, ADC_A_L, regs, "ADC A L", 1, 4, 0);
+    SET_OP(table, 0x8E, ADC_A_mHL, regs, "ADC A $(HL)", 1, 8, 0);
+    SET_OP(table, 0x8F, ADC_A_A, regs, "ADC A A", 1, 4, 0);
 
-    SET_OP(table, 0x90, SUB_A_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0x91, SUB_A_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x92, SUB_A_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0x93, SUB_A_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0x94, SUB_A_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x95, SUB_A_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x96, SUB_A_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x97, SUB_A_A, regs, "", 1, 4, 0);
-    SET_OP(table, 0x98, SBC_A_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0x99, SBC_A_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0x9A, SBC_A_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0x9B, SBC_A_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0x9C, SBC_A_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0x9D, SBC_A_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0x9E, SBC_A_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0x9F, SBC_A_A, regs, "", 1, 4, 0);
+    SET_OP(table, 0x90, SUB_A_B, regs, "SUB A B", 1, 4, 0);
+    SET_OP(table, 0x91, SUB_A_C, regs, "SUB A C", 1, 4, 0);
+    SET_OP(table, 0x92, SUB_A_D, regs, "SUB A D", 1, 4, 0);
+    SET_OP(table, 0x93, SUB_A_E, regs, "SUB A E", 1, 4, 0);
+    SET_OP(table, 0x94, SUB_A_H, regs, "SUB A H", 1, 4, 0);
+    SET_OP(table, 0x95, SUB_A_L, regs, "SUB A L", 1, 4, 0);
+    SET_OP(table, 0x96, SUB_A_mHL, regs, "SUB A $(HL)", 1, 8, 0);
+    SET_OP(table, 0x97, SUB_A_A, regs, "SUB A A", 1, 4, 0);
+    SET_OP(table, 0x98, SBC_A_B, regs, "SBC A B", 1, 4, 0);
+    SET_OP(table, 0x99, SBC_A_C, regs, "SBC A C", 1, 4, 0);
+    SET_OP(table, 0x9A, SBC_A_D, regs, "SBC A D", 1, 4, 0);
+    SET_OP(table, 0x9B, SBC_A_E, regs, "SBC A E", 1, 4, 0);
+    SET_OP(table, 0x9C, SBC_A_H, regs, "SBC A H", 1, 4, 0);
+    SET_OP(table, 0x9D, SBC_A_L, regs, "SBC A L", 1, 4, 0);
+    SET_OP(table, 0x9E, SBC_A_mHL, regs, "SBC A $(HL)", 1, 8, 0);
+    SET_OP(table, 0x9F, SBC_A_A, regs, "SBC A A", 1, 4, 0);
 
-    SET_OP(table, 0xA0, AND_A_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0xA1, AND_A_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0xA2, AND_A_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0xA3, AND_A_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0xA4, AND_A_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0xA5, AND_A_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0xA6, AND_A_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0xA7, AND_A_A, regs, "", 1, 4, 0);
-    SET_OP(table, 0xA8, XOR_A_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0xA9, XOR_A_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0xAA, XOR_A_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0xAB, XOR_A_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0xAC, XOR_A_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0xAD, XOR_A_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0xAE, XOR_A_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0xAF, XOR_A_A, regs, "", 1, 4, 0);
+    SET_OP(table, 0xA0, AND_A_B, regs, "AND A B", 1, 4, 0);
+    SET_OP(table, 0xA1, AND_A_C, regs, "AND A C", 1, 4, 0);
+    SET_OP(table, 0xA2, AND_A_D, regs, "AND A D", 1, 4, 0);
+    SET_OP(table, 0xA3, AND_A_E, regs, "AND A E", 1, 4, 0);
+    SET_OP(table, 0xA4, AND_A_H, regs, "AND A H", 1, 4, 0);
+    SET_OP(table, 0xA5, AND_A_L, regs, "AND A L", 1, 4, 0);
+    SET_OP(table, 0xA6, AND_A_mHL, regs, "AND A $(HL)", 1, 8, 0);
+    SET_OP(table, 0xA7, AND_A_A, regs, "AND A A", 1, 4, 0);
+    SET_OP(table, 0xA8, XOR_A_B, regs, "XOR A B", 1, 4, 0);
+    SET_OP(table, 0xA9, XOR_A_C, regs, "XOR A C", 1, 4, 0);
+    SET_OP(table, 0xAA, XOR_A_D, regs, "XOR A D", 1, 4, 0);
+    SET_OP(table, 0xAB, XOR_A_E, regs, "XOR A E", 1, 4, 0);
+    SET_OP(table, 0xAC, XOR_A_H, regs, "XOR A H", 1, 4, 0);
+    SET_OP(table, 0xAD, XOR_A_L, regs, "XOR A L", 1, 4, 0);
+    SET_OP(table, 0xAE, XOR_A_mHL, regs, "XOR A $(HL)", 1, 8, 0);
+    SET_OP(table, 0xAF, XOR_A_A, regs, "XOR A A", 1, 4, 0);
 
-    SET_OP(table, 0xB0, OR_A_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0xB1, OR_A_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0xB2, OR_A_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0xB3, OR_A_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0xB4, OR_A_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0xB5, OR_A_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0xB6, OR_A_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0xB7, OR_A_A, regs, "", 1, 4, 0);
-    SET_OP(table, 0xB8, CP_A_B, regs, "", 1, 4, 0);
-    SET_OP(table, 0xB9, CP_A_C, regs, "", 1, 4, 0);
-    SET_OP(table, 0xBA, CP_A_D, regs, "", 1, 4, 0);
-    SET_OP(table, 0xBB, CP_A_E, regs, "", 1, 4, 0);
-    SET_OP(table, 0xBC, CP_A_H, regs, "", 1, 4, 0);
-    SET_OP(table, 0xBD, CP_A_L, regs, "", 1, 4, 0);
-    SET_OP(table, 0xBE, CP_A_mHL, regs, "", 1, 8, 0);
-    SET_OP(table, 0xBF, CP_A_A, regs, "", 1, 4, 0);
+    SET_OP(table, 0xB0, OR_A_B, regs, "OR A B", 1, 4, 0);
+    SET_OP(table, 0xB1, OR_A_C, regs, "OR A C", 1, 4, 0);
+    SET_OP(table, 0xB2, OR_A_D, regs, "OR A D", 1, 4, 0);
+    SET_OP(table, 0xB3, OR_A_E, regs, "OR A E", 1, 4, 0);
+    SET_OP(table, 0xB4, OR_A_H, regs, "OR A H", 1, 4, 0);
+    SET_OP(table, 0xB5, OR_A_L, regs, "OR A L", 1, 4, 0);
+    SET_OP(table, 0xB6, OR_A_mHL, regs, "OR A $(HL)", 1, 8, 0);
+    SET_OP(table, 0xB7, OR_A_A, regs, "OR A A", 1, 4, 0);
+    SET_OP(table, 0xB8, CP_A_B, regs, "CP A B", 1, 4, 0);
+    SET_OP(table, 0xB9, CP_A_C, regs, "CP A C", 1, 4, 0);
+    SET_OP(table, 0xBA, CP_A_D, regs, "CP A D", 1, 4, 0);
+    SET_OP(table, 0xBB, CP_A_E, regs, "CP A E", 1, 4, 0);
+    SET_OP(table, 0xBC, CP_A_H, regs, "CP A H", 1, 4, 0);
+    SET_OP(table, 0xBD, CP_A_L, regs, "CP A L", 1, 4, 0);
+    SET_OP(table, 0xBE, CP_A_mHL, regs, "CP A $(HL)", 1, 8, 0);
+    SET_OP(table, 0xBF, CP_A_A, regs, "CP A A", 1, 4, 0);
 
-    SET_OP(table, 0xC0, RET_NZ, regs, "", 1, 8, 20);
-    SET_OP(table, 0xC1, POP_BC, regs, "", 1, 12, 0);
-    SET_OP(table, 0xC2, JP_NZ_16IM, regs, "", 3, 12, 16);
-    SET_OP(table, 0xC3, JP_16IM, regs, "", 3, 16, 0);
-    SET_OP(table, 0xC4, CALL_NZ_16IM, regs, "", 3, 12, 24);
-    SET_OP(table, 0xC5, PUSH_BC, regs, "", 1, 16, 0);
-    SET_OP(table, 0xC6, ADD_A_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0xC7, RST_00h, regs, "", 1, 16, 0);
-    SET_OP(table, 0xC8, RET_Z, regs, "", 1, 8, 20);
-    SET_OP(table, 0xC9, RET, regs, "", 1, 16, 0);
-    SET_OP(table, 0xCA, JP_Z_16IM, regs, "", 3, 12, 16);
-    SET_OP(table, 0xCB, PREFIX, cpu, "", 1, 4, 0);
-    SET_OP(table, 0xCC, CALL_Z_16IM, regs, "", 3, 12, 24);
-    SET_OP(table, 0xCD, CALL_16IM, regs, "", 3, 24, 0);
-    SET_OP(table, 0xCE, ADC_A_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0xCF, RST_08h, regs, "", 1, 16, 0);
+    SET_OP(table, 0xC0, RET_NZ, regs, "RET NZ", 1, 8, 20);
+    SET_OP(table, 0xC1, POP_BC, regs, "POP BC", 1, 12, 0);
+    SET_OP(table, 0xC2, JP_NZ_16IM, regs, "JR NZ $%x", 3, 12, 16);
+    SET_OP(table, 0xC3, JP_16IM, regs, "JP $%x", 3, 16, 0);
+    SET_OP(table, 0xC4, CALL_NZ_16IM, regs, "CALL NZ $%x", 3, 12, 24);
+    SET_OP(table, 0xC5, PUSH_BC, regs, "PUSH BC", 1, 16, 0);
+    SET_OP(table, 0xC6, ADD_A_8IM, regs, "ADD A $%x", 2, 8, 0);
+    SET_OP(table, 0xC7, RST_00h, regs, "RST 00h", 1, 16, 0);
+    SET_OP(table, 0xC8, RET_Z, regs, "RET Z", 1, 8, 20);
+    SET_OP(table, 0xC9, RET, regs, "RET", 1, 16, 0);
+    SET_OP(table, 0xCA, JP_Z_16IM, regs, "JP Z $%x", 3, 12, 16);
+    SET_OP(table, 0xCB, PREFIX, cpu, "PREFIX", 1, 4, 0);
+    SET_OP(table, 0xCC, CALL_Z_16IM, regs, "CALL Z $%x", 3, 12, 24);
+    SET_OP(table, 0xCD, CALL_16IM, regs, "CALL $%x", 3, 24, 0);
+    SET_OP(table, 0xCE, ADC_A_8IM, regs, "ADC A $%x", 2, 8, 0);
+    SET_OP(table, 0xCF, RST_08h, regs, "RST 08h", 1, 16, 0);
 
-    SET_OP(table, 0xD0, RET_NC, regs, "", 1, 8, 20);
-    SET_OP(table, 0xD1, POP_DE, regs, "", 1, 12, 0);
-    SET_OP(table, 0xD2, JP_NC_16IM, regs, "", 3, 12, 16);
-    SET_OP(table, 0xD3, UNKNOWN, regs, "", 0, 0, 0);
-    SET_OP(table, 0xD4, CALL_NC_16IM, regs, "", 3, 12, 24);
-    SET_OP(table, 0xD5, PUSH_DE, regs, "", 1, 16, 0);
-    SET_OP(table, 0xD6, SUB_A_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0xD7, RST_10h, regs, "", 1, 16, 0);
-    SET_OP(table, 0xD8, RET_C, regs, "", 1, 8, 0);
-    SET_OP(table, 0xD9, RETI, cpu, "", 1, 16, 0);
-    SET_OP(table, 0xDA, JP_C_16IM, regs, "", 3, 12, 16);
-    SET_OP(table, 0xDB, UNKNOWN, regs, "", 0, 0, 0);
-    SET_OP(table, 0xDC, CALL_C_16IM, regs, "", 3, 12, 24);
-    SET_OP(table, 0xDD, UNKNOWN, regs, "", 0, 0, 0);
-    SET_OP(table, 0xDE, SBC_A_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0xDF, RST_18h, regs, "", 1, 16, 0);
+    SET_OP(table, 0xD0, RET_NC, regs, "RET NC", 1, 8, 20);
+    SET_OP(table, 0xD1, POP_DE, regs, "POP DE", 1, 12, 0);
+    SET_OP(table, 0xD2, JP_NC_16IM, regs, "JP NC $%x", 3, 12, 16);
+    SET_OP(table, 0xD3, UNKNOWN, regs, "UNKNOWN", 0, 0, 0);
+    SET_OP(table, 0xD4, CALL_NC_16IM, regs, "CALL NC $%x", 3, 12, 24);
+    SET_OP(table, 0xD5, PUSH_DE, regs, "PUSH DE", 1, 16, 0);
+    SET_OP(table, 0xD6, SUB_A_8IM, regs, "SUB A $%x", 2, 8, 0);
+    SET_OP(table, 0xD7, RST_10h, regs, "RST 10h", 1, 16, 0);
+    SET_OP(table, 0xD8, RET_C, regs, "RET C", 1, 8, 0);
+    SET_OP(table, 0xD9, RETI, cpu, "RETI", 1, 16, 0);
+    SET_OP(table, 0xDA, JP_C_16IM, regs, "JP C $%x", 3, 12, 16);
+    SET_OP(table, 0xDB, UNKNOWN, regs, "UNKOWN", 0, 0, 0);
+    SET_OP(table, 0xDC, CALL_C_16IM, regs, "CALL C $%x", 3, 12, 24);
+    SET_OP(table, 0xDD, UNKNOWN, regs, "UNKOWN", 0, 0, 0);
+    SET_OP(table, 0xDE, SBC_A_8IM, regs, "SBC A $%x", 2, 8, 0);
+    SET_OP(table, 0xDF, RST_18h, regs, "RST 18h", 1, 16, 0);
 
-    SET_OP(table, 0xE0, LD_FF00_8IM_A, regs, "", 2, 12, 0);
-    SET_OP(table, 0xE1, POP_HL, regs, "", 1, 12, 0);
-    SET_OP(table, 0xE2, LD_FF00_C_A, regs, "", 1, 8, 0);
-    SET_OP(table, 0xE3, UNKNOWN, regs, "", 0, 0, 0);
-    SET_OP(table, 0xE4, UNKNOWN, regs, "", 0, 0, 0);
-    SET_OP(table, 0xE5, PUSH_HL, regs, "", 1, 16, 0);
-    SET_OP(table, 0xE6, AND_A_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0xE7, RST_20h, regs, "", 1, 16, 0);
-    SET_OP(table, 0xE8, ADD_SP_e8, regs, "", 2, 16, 0);
-    SET_OP(table, 0xE9, JP_HL, regs, "", 1, 4, 0);
-    SET_OP(table, 0xEA, LD_m16_A, regs, "", 3, 16, 0);
-    SET_OP(table, 0xEB, UNKNOWN, regs, "", 0, 0, 0);
-    SET_OP(table, 0xEC, UNKNOWN, regs, "", 0, 0, 0);
-    SET_OP(table, 0xED, UNKNOWN, regs, "", 0, 0, 0);
-    SET_OP(table, 0xEE, XOR_A_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0xEF, RST_28h, regs, "", 1, 16, 0);
+    SET_OP(table, 0xE0, LD_FF00_8IM_A, regs, "LD $(FF00 + %x) A", 2, 12, 0);
+    SET_OP(table, 0xE1, POP_HL, regs, "POP HL", 1, 12, 0);
+    SET_OP(table, 0xE2, LD_FF00_C_A, regs, "LD $(FF00 + C) A", 1, 8, 0);
+    SET_OP(table, 0xE3, UNKNOWN, regs, "UNKOWN", 0, 0, 0);
+    SET_OP(table, 0xE4, UNKNOWN, regs, "UNKOWN", 0, 0, 0);
+    SET_OP(table, 0xE5, PUSH_HL, regs, "PUSH HL", 1, 16, 0);
+    SET_OP(table, 0xE6, AND_A_8IM, regs, "AND A $%x", 2, 8, 0);
+    SET_OP(table, 0xE7, RST_20h, regs, "RST 20h", 1, 16, 0);
+    SET_OP(table, 0xE8, ADD_SP_e8, regs, "ADD SP $%x", 2, 16, 0);
+    SET_OP(table, 0xE9, JP_HL, regs, "JP HL", 1, 4, 0);
+    SET_OP(table, 0xEA, LD_m16_A, regs, "LD $%x", 3, 16, 0);
+    SET_OP(table, 0xEB, UNKNOWN, regs, "UNKNOWN", 0, 0, 0);
+    SET_OP(table, 0xEC, UNKNOWN, regs, "UNKNOWN", 0, 0, 0);
+    SET_OP(table, 0xED, UNKNOWN, regs, "UNKNOWN", 0, 0, 0);
+    SET_OP(table, 0xEE, XOR_A_8IM, regs, "XOR A $%x", 2, 8, 0);
+    SET_OP(table, 0xEF, RST_28h, regs, "RST 28h", 1, 16, 0);
 
-    SET_OP(table, 0xF0, LD_A_FF00_8IM, regs, "", 2, 12, 0);
-    SET_OP(table, 0xF1, POP_AF, regs, "", 1, 12, 0);
-    SET_OP(table, 0xF2, LD_A_FFOO_C, regs, "", 1, 8, 0);
-    SET_OP(table, 0xF3, DI, cpu, "", 1, 4, 0);
-    SET_OP(table, 0xF4, UNKNOWN, regs, "", 0, 0, 0);
-    SET_OP(table, 0xF5, PUSH_AF, regs, "", 1, 16, 0);
-    SET_OP(table, 0xF6, OR_A_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0xF7, RST_30h, regs, "", 1, 16, 0);
-    SET_OP(table, 0xF8, LD_HL_SP8IM, regs, "", 1, 8, 0);
-    SET_OP(table, 0xF9, LD_SP_HL, regs, "", 1, 8, 0);
-    SET_OP(table, 0xFA, LD_A_m16, regs, "", 3, 16, 0);
-    SET_OP(table, 0xFB, EI, cpu, "", 1, 4, 0);
-    SET_OP(table, 0xFC, UNKNOWN, regs, "", 0, 0, 0);
-    SET_OP(table, 0xFD, UNKNOWN, regs, "", 0, 0, 0);
-    SET_OP(table, 0xFE, CP_A_8IM, regs, "", 2, 8, 0);
-    SET_OP(table, 0xFF, RST_38h, regs, "", 1, 16, 0);
+    SET_OP(table, 0xF0, LD_A_FF00_8IM, regs, "LD A $(FFOO + %x)", 2, 12, 0);
+    SET_OP(table, 0xF1, POP_AF, regs, "POP AF", 1, 12, 0);
+    SET_OP(table, 0xF2, LD_A_FFOO_C, regs, "LD A $(FF00 + C)", 1, 8, 0);
+    SET_OP(table, 0xF3, DI, cpu, "DI", 1, 4, 0);
+    SET_OP(table, 0xF4, UNKNOWN, regs, "UNKNOWN", 0, 0, 0);
+    SET_OP(table, 0xF5, PUSH_AF, regs, "PUSH AF", 1, 16, 0);
+    SET_OP(table, 0xF6, OR_A_8IM, regs, "OR A $%x", 2, 8, 0);
+    SET_OP(table, 0xF7, RST_30h, regs, "RST 30h", 1, 16, 0);
+    SET_OP(table, 0xF8, LD_HL_SP8IM, regs, "LD HL $(SP + %x)", 1, 8, 0);
+    SET_OP(table, 0xF9, LD_SP_HL, regs, "LD SP HL", 1, 8, 0);
+    SET_OP(table, 0xFA, LD_A_m16, regs, "LD A $%x", 3, 16, 0);
+    SET_OP(table, 0xFB, EI, cpu, "EI", 1, 4, 0);
+    SET_OP(table, 0xFC, UNKNOWN, regs, "UNKNOWN", 0, 0, 0);
+    SET_OP(table, 0xFD, UNKNOWN, regs, "UNKNOWN", 0, 0, 0);
+    SET_OP(table, 0xFE, CP_A_8IM, regs, "CP A $%x", 2, 8, 0);
+    SET_OP(table, 0xFF, RST_38h, regs, "RST 38h", 1, 16, 0);
 }
 
 void InitPrefixedOptable(inst_t* table) {
-    SET_OP(table, 0x00, RLC_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x01, RLC_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x02, RLC_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x03, RLC_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x04, RLC_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x05, RLC_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x06, RLC_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0x07, RLC_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0x08, RRC_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x09, RRC_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x0A, RRC_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x0B, RRC_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x0C, RRC_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x0D, RRC_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x0E, RRC_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0x0F, RRC_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0x00, RLC_B, regs, "RLC B", 2, 8, 0);
+    SET_OP(table, 0x01, RLC_C, regs, "RLC C", 2, 8, 0);
+    SET_OP(table, 0x02, RLC_D, regs, "RLC D", 2, 8, 0);
+    SET_OP(table, 0x03, RLC_E, regs, "RLC E", 2, 8, 0);
+    SET_OP(table, 0x04, RLC_H, regs, "RLC H", 2, 8, 0);
+    SET_OP(table, 0x05, RLC_L, regs, "RLC L", 2, 8, 0);
+    SET_OP(table, 0x06, RLC_mHL, regs, "RLC mHL", 2, 16, 0);
+    SET_OP(table, 0x07, RLC_A, regs, "RLC A", 2, 8, 0);
+    SET_OP(table, 0x08, RRC_B, regs, "RRC B", 2, 8, 0);
+    SET_OP(table, 0x09, RRC_C, regs, "RRC C", 2, 8, 0);
+    SET_OP(table, 0x0A, RRC_D, regs, "RRC D", 2, 8, 0);
+    SET_OP(table, 0x0B, RRC_E, regs, "RRC E", 2, 8, 0);
+    SET_OP(table, 0x0C, RRC_H, regs, "RRC H", 2, 8, 0);
+    SET_OP(table, 0x0D, RRC_L, regs, "RRC L", 2, 8, 0);
+    SET_OP(table, 0x0E, RRC_mHL, regs, "RRC mHL", 2, 16, 0);
+    SET_OP(table, 0x0F, RRC_A, regs, "RRC A", 2, 8, 0);
 
-    SET_OP(table, 0x10, RL_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x11, RL_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x12, RL_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x13, RL_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x14, RL_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x15, RL_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x16, RL_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0x17, RL_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0x18, RR_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x19, RR_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x1A, RR_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x1B, RR_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x1C, RR_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x1D, RR_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x1E, RR_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0x1F, RR_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0x10, RL_B, regs, "RL B", 2, 8, 0);
+    SET_OP(table, 0x11, RL_C, regs, "RL C", 2, 8, 0);
+    SET_OP(table, 0x12, RL_D, regs, "RL D", 2, 8, 0);
+    SET_OP(table, 0x13, RL_E, regs, "RL E", 2, 8, 0);
+    SET_OP(table, 0x14, RL_H, regs, "RL H", 2, 8, 0);
+    SET_OP(table, 0x15, RL_L, regs, "RL L", 2, 8, 0);
+    SET_OP(table, 0x16, RL_mHL, regs, "RL mHL", 2, 16, 0);
+    SET_OP(table, 0x17, RL_A, regs, "RL A", 2, 8, 0);
+    SET_OP(table, 0x18, RR_B, regs, "RR B", 2, 8, 0);
+    SET_OP(table, 0x19, RR_C, regs, "RR C", 2, 8, 0);
+    SET_OP(table, 0x1A, RR_D, regs, "RR D", 2, 8, 0);
+    SET_OP(table, 0x1B, RR_E, regs, "RR E", 2, 8, 0);
+    SET_OP(table, 0x1C, RR_H, regs, "RR H", 2, 8, 0);
+    SET_OP(table, 0x1D, RR_L, regs, "RR L", 2, 8, 0);
+    SET_OP(table, 0x1E, RR_mHL, regs, "RR mHL", 2, 16, 0);
+    SET_OP(table, 0x1F, RR_A, regs, "RR A", 2, 8, 0);
 
-    SET_OP(table, 0x20, SLA_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x21, SLA_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x22, SLA_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x23, SLA_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x24, SLA_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x25, SLA_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x26, SLA_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0x27, SLA_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0x28, SRA_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x29, SRA_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x2A, SRA_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x2B, SRA_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x2C, SRA_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x2D, SRA_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x2E, SRA_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0x2F, SRA_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0x20, SLA_B, regs, "SLA B", 2, 8, 0);
+    SET_OP(table, 0x21, SLA_C, regs, "SLA C", 2, 8, 0);
+    SET_OP(table, 0x22, SLA_D, regs, "SLA D", 2, 8, 0);
+    SET_OP(table, 0x23, SLA_E, regs, "SLA E", 2, 8, 0);
+    SET_OP(table, 0x24, SLA_H, regs, "SLA H", 2, 8, 0);
+    SET_OP(table, 0x25, SLA_L, regs, "SLA L", 2, 8, 0);
+    SET_OP(table, 0x26, SLA_mHL, regs, "SLA mHL", 2, 16, 0);
+    SET_OP(table, 0x27, SLA_A, regs, "SLA A", 2, 8, 0);
+    SET_OP(table, 0x28, SRA_B, regs, "SRA B", 2, 8, 0);
+    SET_OP(table, 0x29, SRA_C, regs, "SRA C", 2, 8, 0);
+    SET_OP(table, 0x2A, SRA_D, regs, "SRA D", 2, 8, 0);
+    SET_OP(table, 0x2B, SRA_E, regs, "SRA E", 2, 8, 0);
+    SET_OP(table, 0x2C, SRA_H, regs, "SRA H", 2, 8, 0);
+    SET_OP(table, 0x2D, SRA_L, regs, "SRA L", 2, 8, 0);
+    SET_OP(table, 0x2E, SRA_mHL, regs, "SRA mHL", 2, 16, 0);
+    SET_OP(table, 0x2F, SRA_A, regs, "SRA A", 2, 8, 0);
 
-    SET_OP(table, 0x30, SWAP_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x31, SWAP_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x32, SWAP_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x33, SWAP_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x34, SWAP_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x35, SWAP_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x36, SWAP_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0x37, SWAP_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0x38, SRL_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x39, SRL_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x3A, SRL_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x3B, SRL_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x3C, SRL_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x3D, SRL_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x3E, SRL_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0x3F, SRL_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0x30, SWAP_B, regs, "SWAP B", 2, 8, 0);
+    SET_OP(table, 0x31, SWAP_C, regs, "SWAP C", 2, 8, 0);
+    SET_OP(table, 0x32, SWAP_D, regs, "SWAP D", 2, 8, 0);
+    SET_OP(table, 0x33, SWAP_E, regs, "SWAP E", 2, 8, 0);
+    SET_OP(table, 0x34, SWAP_H, regs, "SWAP H", 2, 8, 0);
+    SET_OP(table, 0x35, SWAP_L, regs, "SWAP L", 2, 8, 0);
+    SET_OP(table, 0x36, SWAP_mHL, regs, "SWAP mHL", 2, 16, 0);
+    SET_OP(table, 0x37, SWAP_A, regs, "SWAP A", 2, 8, 0);
+    SET_OP(table, 0x38, SRL_B, regs, "SRL B", 2, 8, 0);
+    SET_OP(table, 0x39, SRL_C, regs, "SRL C", 2, 8, 0);
+    SET_OP(table, 0x3A, SRL_D, regs, "SRL D", 2, 8, 0);
+    SET_OP(table, 0x3B, SRL_E, regs, "SRL E", 2, 8, 0);
+    SET_OP(table, 0x3C, SRL_H, regs, "SRL H", 2, 8, 0);
+    SET_OP(table, 0x3D, SRL_L, regs, "SRL L", 2, 8, 0);
+    SET_OP(table, 0x3E, SRL_mHL, regs, "SRL mHL", 2, 16, 0);
+    SET_OP(table, 0x3F, SRL_A, regs, "SRL A", 2, 8, 0);
 
-    SET_OP(table, 0x40, BIT_0_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x41, BIT_0_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x42, BIT_0_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x43, BIT_0_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x44, BIT_0_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x45, BIT_0_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x46, BIT_0_mHL, regs, "", 2, 12, 0);
-    SET_OP(table, 0x47, BIT_0_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0x48, BIT_1_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x49, BIT_1_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x4A, BIT_1_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x4B, BIT_1_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x4C, BIT_1_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x4D, BIT_1_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x4E, BIT_1_mHL, regs, "", 2, 12, 0);
-    SET_OP(table, 0x4F, BIT_1_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0x40, BIT_0_B, regs, "BIT 0 B", 2, 8, 0);
+    SET_OP(table, 0x41, BIT_0_C, regs, "BIT 0 C", 2, 8, 0);
+    SET_OP(table, 0x42, BIT_0_D, regs, "BIT 0 D", 2, 8, 0);
+    SET_OP(table, 0x43, BIT_0_E, regs, "BIT 0 E", 2, 8, 0);
+    SET_OP(table, 0x44, BIT_0_H, regs, "BIT 0 H", 2, 8, 0);
+    SET_OP(table, 0x45, BIT_0_L, regs, "BIT 0 L", 2, 8, 0);
+    SET_OP(table, 0x46, BIT_0_mHL, regs, "BIT 0 mHL", 2, 12, 0);
+    SET_OP(table, 0x47, BIT_0_A, regs, "BIT 0 A", 2, 8, 0);
+    SET_OP(table, 0x48, BIT_1_B, regs, "BIT 1 B", 2, 8, 0);
+    SET_OP(table, 0x49, BIT_1_C, regs, "BIT 1 C", 2, 8, 0);
+    SET_OP(table, 0x4A, BIT_1_D, regs, "BIT 1 D", 2, 8, 0);
+    SET_OP(table, 0x4B, BIT_1_E, regs, "BIT 1 E", 2, 8, 0);
+    SET_OP(table, 0x4C, BIT_1_H, regs, "BIT 1 H", 2, 8, 0);
+    SET_OP(table, 0x4D, BIT_1_L, regs, "BIT 1 L", 2, 8, 0);
+    SET_OP(table, 0x4E, BIT_1_mHL, regs, "BIT 1 mHL", 2, 12, 0);
+    SET_OP(table, 0x4F, BIT_1_A, regs, "BIT 1 A", 2, 8, 0);
 
-    SET_OP(table, 0x50, BIT_2_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x51, BIT_2_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x52, BIT_2_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x53, BIT_2_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x54, BIT_2_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x55, BIT_2_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x56, BIT_2_mHL, regs, "", 2, 12, 0);
-    SET_OP(table, 0x57, BIT_2_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0x58, BIT_3_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x59, BIT_3_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x5A, BIT_3_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x5B, BIT_3_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x5C, BIT_3_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x5D, BIT_3_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x5E, BIT_3_mHL, regs, "", 2, 12, 0);
-    SET_OP(table, 0x5F, BIT_3_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0x50, BIT_2_B, regs, "BIT 2 B", 2, 8, 0);
+    SET_OP(table, 0x51, BIT_2_C, regs, "BIT 2 C", 2, 8, 0);
+    SET_OP(table, 0x52, BIT_2_D, regs, "BIT 2 D", 2, 8, 0);
+    SET_OP(table, 0x53, BIT_2_E, regs, "BIT 2 E", 2, 8, 0);
+    SET_OP(table, 0x54, BIT_2_H, regs, "BIT 2 H", 2, 8, 0);
+    SET_OP(table, 0x55, BIT_2_L, regs, "BIT 2 L", 2, 8, 0);
+    SET_OP(table, 0x56, BIT_2_mHL, regs, "BIT 2 mHL", 2, 12, 0);
+    SET_OP(table, 0x57, BIT_2_A, regs, "BIT 2 A", 2, 8, 0);
+    SET_OP(table, 0x58, BIT_3_B, regs, "BIT 3 B", 2, 8, 0);
+    SET_OP(table, 0x59, BIT_3_C, regs, "BIT 3 C", 2, 8, 0);
+    SET_OP(table, 0x5A, BIT_3_D, regs, "BIT 3 D", 2, 8, 0);
+    SET_OP(table, 0x5B, BIT_3_E, regs, "BIT 3 E", 2, 8, 0);
+    SET_OP(table, 0x5C, BIT_3_H, regs, "BIT 3 H", 2, 8, 0);
+    SET_OP(table, 0x5D, BIT_3_L, regs, "BIT 3 L", 2, 8, 0);
+    SET_OP(table, 0x5E, BIT_3_mHL, regs, "BIT 3 mHL", 2, 12, 0);
+    SET_OP(table, 0x5F, BIT_3_A, regs, "BIT 3 A", 2, 8, 0);
 
-    SET_OP(table, 0x60, BIT_4_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x61, BIT_4_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x62, BIT_4_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x63, BIT_4_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x64, BIT_4_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x65, BIT_4_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x66, BIT_4_mHL, regs, "", 2, 12, 0);
-    SET_OP(table, 0x67, BIT_4_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0x68, BIT_5_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x69, BIT_5_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x6A, BIT_5_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x6B, BIT_5_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x6C, BIT_5_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x6D, BIT_5_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x6E, BIT_5_mHL, regs, "", 2, 12, 0);
-    SET_OP(table, 0x6F, BIT_5_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0x60, BIT_4_B, regs, "BIT 4 B", 2, 8, 0);
+    SET_OP(table, 0x61, BIT_4_C, regs, "BIT 4 C", 2, 8, 0);
+    SET_OP(table, 0x62, BIT_4_D, regs, "BIT 4 D", 2, 8, 0);
+    SET_OP(table, 0x63, BIT_4_E, regs, "BIT 4 E", 2, 8, 0);
+    SET_OP(table, 0x64, BIT_4_H, regs, "BIT 4 H", 2, 8, 0);
+    SET_OP(table, 0x65, BIT_4_L, regs, "BIT 4 L", 2, 8, 0);
+    SET_OP(table, 0x66, BIT_4_mHL, regs, "BIT 4 mHL", 2, 12, 0);
+    SET_OP(table, 0x67, BIT_4_A, regs, "BIT 4 A", 2, 8, 0);
+    SET_OP(table, 0x68, BIT_5_B, regs, "BIT 5 B", 2, 8, 0);
+    SET_OP(table, 0x69, BIT_5_C, regs, "BIT 5 C", 2, 8, 0);
+    SET_OP(table, 0x6A, BIT_5_D, regs, "BIT 5 D", 2, 8, 0);
+    SET_OP(table, 0x6B, BIT_5_E, regs, "BIT 5 E", 2, 8, 0);
+    SET_OP(table, 0x6C, BIT_5_H, regs, "BIT 5 H", 2, 8, 0);
+    SET_OP(table, 0x6D, BIT_5_L, regs, "BIT 5 L", 2, 8, 0);
+    SET_OP(table, 0x6E, BIT_5_mHL, regs, "BIT 5 mHL", 2, 12, 0);
+    SET_OP(table, 0x6F, BIT_5_A, regs, "BIT 5 A", 2, 8, 0);
 
-    SET_OP(table, 0x70, BIT_6_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x71, BIT_6_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x72, BIT_6_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x73, BIT_6_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x74, BIT_6_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x75, BIT_6_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x76, BIT_6_mHL, regs, "", 2, 12, 0);
-    SET_OP(table, 0x77, BIT_6_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0x78, BIT_7_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x79, BIT_7_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x7A, BIT_7_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x7B, BIT_7_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x7C, BIT_7_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x7D, BIT_7_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x7E, BIT_7_mHL, regs, "", 2, 12, 0);
-    SET_OP(table, 0x7F, BIT_7_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0x70, BIT_6_B, regs, "BIT 6 B", 2, 8, 0);
+    SET_OP(table, 0x71, BIT_6_C, regs, "BIT 6 C", 2, 8, 0);
+    SET_OP(table, 0x72, BIT_6_D, regs, "BIT 6 D", 2, 8, 0);
+    SET_OP(table, 0x73, BIT_6_E, regs, "BIT 6 E", 2, 8, 0);
+    SET_OP(table, 0x74, BIT_6_H, regs, "BIT 6 H", 2, 8, 0);
+    SET_OP(table, 0x75, BIT_6_L, regs, "BIT 6 L", 2, 8, 0);
+    SET_OP(table, 0x76, BIT_6_mHL, regs, "BIT 6 mHL", 2, 12, 0);
+    SET_OP(table, 0x77, BIT_6_A, regs, "BIT 6 A", 2, 8, 0);
+    SET_OP(table, 0x78, BIT_7_B, regs, "BIT 7 B", 2, 8, 0);
+    SET_OP(table, 0x79, BIT_7_C, regs, "BIT 7 C", 2, 8, 0);
+    SET_OP(table, 0x7A, BIT_7_D, regs, "BIT 7 D", 2, 8, 0);
+    SET_OP(table, 0x7B, BIT_7_E, regs, "BIT 7 E", 2, 8, 0);
+    SET_OP(table, 0x7C, BIT_7_H, regs, "BIT 7 H", 2, 8, 0);
+    SET_OP(table, 0x7D, BIT_7_L, regs, "BIT 7 L", 2, 8, 0);
+    SET_OP(table, 0x7E, BIT_7_mHL, regs, "BIT 7 mHL", 2, 12, 0);
+    SET_OP(table, 0x7F, BIT_7_A, regs, "BIT 7 A", 2, 8, 0);
 
-    SET_OP(table, 0x80, RES_0_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x81, RES_0_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x82, RES_0_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x83, RES_0_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x84, RES_0_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x85, RES_0_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x86, RES_0_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0x87, RES_0_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0x88, RES_1_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x89, RES_1_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x8A, RES_1_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x8B, RES_1_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x8C, RES_1_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x8D, RES_1_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x8E, RES_1_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0x8F, RES_1_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0x80, RES_0_B, regs, " RES 0 B", 2, 8, 0);
+    SET_OP(table, 0x81, RES_0_C, regs, " RES 0 C", 2, 8, 0);
+    SET_OP(table, 0x82, RES_0_D, regs, " RES 0 D", 2, 8, 0);
+    SET_OP(table, 0x83, RES_0_E, regs, " RES 0 E", 2, 8, 0);
+    SET_OP(table, 0x84, RES_0_H, regs, " RES 0 H", 2, 8, 0);
+    SET_OP(table, 0x85, RES_0_L, regs, " RES 0 L", 2, 8, 0);
+    SET_OP(table, 0x86, RES_0_mHL, regs, " RES 0 mHL", 2, 16, 0);
+    SET_OP(table, 0x87, RES_0_A, regs, " RES 0 A", 2, 8, 0);
+    SET_OP(table, 0x88, RES_1_B, regs, " RES 1 B", 2, 8, 0);
+    SET_OP(table, 0x89, RES_1_C, regs, " RES 1 C", 2, 8, 0);
+    SET_OP(table, 0x8A, RES_1_D, regs, " RES 1 D", 2, 8, 0);
+    SET_OP(table, 0x8B, RES_1_E, regs, " RES 1 E", 2, 8, 0);
+    SET_OP(table, 0x8C, RES_1_H, regs, " RES 1 H", 2, 8, 0);
+    SET_OP(table, 0x8D, RES_1_L, regs, " RES 1 L", 2, 8, 0);
+    SET_OP(table, 0x8E, RES_1_mHL, regs, " RES 1 mHL", 2, 16, 0);
+    SET_OP(table, 0x8F, RES_1_A, regs, " RES 1 A", 2, 8, 0);
 
-    SET_OP(table, 0x90, RES_2_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x91, RES_2_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x92, RES_2_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x93, RES_2_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x94, RES_2_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x95, RES_2_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x96, RES_2_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0x97, RES_2_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0x98, RES_3_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0x99, RES_3_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0x9A, RES_3_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0x9B, RES_3_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0x9C, RES_3_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0x9D, RES_3_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0x9E, RES_3_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0x9F, RES_3_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0x90, RES_2_B, regs, "RES 2 B", 2, 8, 0);
+    SET_OP(table, 0x91, RES_2_C, regs, "RES 2 C", 2, 8, 0);
+    SET_OP(table, 0x92, RES_2_D, regs, "RES 2 D", 2, 8, 0);
+    SET_OP(table, 0x93, RES_2_E, regs, "RES 2 E", 2, 8, 0);
+    SET_OP(table, 0x94, RES_2_H, regs, "RES 2 H", 2, 8, 0);
+    SET_OP(table, 0x95, RES_2_L, regs, "RES 2 L", 2, 8, 0);
+    SET_OP(table, 0x96, RES_2_mHL, regs, "RES 2 mHL", 2, 16, 0);
+    SET_OP(table, 0x97, RES_2_A, regs, "RES 2 A", 2, 8, 0);
+    SET_OP(table, 0x98, RES_3_B, regs, "RES 3 B", 2, 8, 0);
+    SET_OP(table, 0x99, RES_3_C, regs, "RES 3 C", 2, 8, 0);
+    SET_OP(table, 0x9A, RES_3_D, regs, "RES 3 D", 2, 8, 0);
+    SET_OP(table, 0x9B, RES_3_E, regs, "RES 3 E", 2, 8, 0);
+    SET_OP(table, 0x9C, RES_3_H, regs, "RES 3 H", 2, 8, 0);
+    SET_OP(table, 0x9D, RES_3_L, regs, "RES 3 L", 2, 8, 0);
+    SET_OP(table, 0x9E, RES_3_mHL, regs, "RES 3 mHL", 2, 16, 0);
+    SET_OP(table, 0x9F, RES_3_A, regs, "RES 3 A", 2, 8, 0);
 
-    SET_OP(table, 0xA0, RES_4_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0xA1, RES_4_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0xA2, RES_4_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0xA3, RES_4_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0xA4, RES_4_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0xA5, RES_4_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0xA6, RES_4_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0xA7, RES_4_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0xA8, RES_5_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0xA9, RES_5_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0xAA, RES_5_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0xAB, RES_5_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0xAC, RES_5_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0xAD, RES_5_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0xAE, RES_5_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0xAF, RES_5_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0xA0, RES_4_B, regs, "RES 4 B", 2, 8, 0);
+    SET_OP(table, 0xA1, RES_4_C, regs, "RES 4 C", 2, 8, 0);
+    SET_OP(table, 0xA2, RES_4_D, regs, "RES 4 D", 2, 8, 0);
+    SET_OP(table, 0xA3, RES_4_E, regs, "RES 4 E", 2, 8, 0);
+    SET_OP(table, 0xA4, RES_4_H, regs, "RES 4 H", 2, 8, 0);
+    SET_OP(table, 0xA5, RES_4_L, regs, "RES 4 L", 2, 8, 0);
+    SET_OP(table, 0xA6, RES_4_mHL, regs, "RES 4 mHL", 2, 16, 0);
+    SET_OP(table, 0xA7, RES_4_A, regs, "RES 4 A", 2, 8, 0);
+    SET_OP(table, 0xA8, RES_5_B, regs, "RES 5 B", 2, 8, 0);
+    SET_OP(table, 0xA9, RES_5_C, regs, "RES 5 C", 2, 8, 0);
+    SET_OP(table, 0xAA, RES_5_D, regs, "RES 5 D", 2, 8, 0);
+    SET_OP(table, 0xAB, RES_5_E, regs, "RES 5 E", 2, 8, 0);
+    SET_OP(table, 0xAC, RES_5_H, regs, "RES 5 H", 2, 8, 0);
+    SET_OP(table, 0xAD, RES_5_L, regs, "RES 5 L", 2, 8, 0);
+    SET_OP(table, 0xAE, RES_5_mHL, regs, "RES 5 mHL", 2, 16, 0);
+    SET_OP(table, 0xAF, RES_5_A, regs, "RES 5 A", 2, 8, 0);
 
-    SET_OP(table, 0xB0, RES_6_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0xB1, RES_6_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0xB2, RES_6_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0xB3, RES_6_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0xB4, RES_6_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0xB5, RES_6_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0xB6, RES_6_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0xB7, RES_6_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0xB8, RES_7_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0xB9, RES_7_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0xBA, RES_7_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0xBB, RES_7_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0xBC, RES_7_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0xBD, RES_7_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0xBE, RES_7_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0xBF, RES_7_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0xB0, RES_6_B, regs, "RES 6 B", 2, 8, 0);
+    SET_OP(table, 0xB1, RES_6_C, regs, "RES 6 C", 2, 8, 0);
+    SET_OP(table, 0xB2, RES_6_D, regs, "RES 6 D", 2, 8, 0);
+    SET_OP(table, 0xB3, RES_6_E, regs, "RES 6 E", 2, 8, 0);
+    SET_OP(table, 0xB4, RES_6_H, regs, "RES 6 H", 2, 8, 0);
+    SET_OP(table, 0xB5, RES_6_L, regs, "RES 6 L", 2, 8, 0);
+    SET_OP(table, 0xB6, RES_6_mHL, regs, "RES 6 mHL", 2, 16, 0);
+    SET_OP(table, 0xB7, RES_6_A, regs, "RES 6 A", 2, 8, 0);
+    SET_OP(table, 0xB8, RES_7_B, regs, "RES 7 B", 2, 8, 0);
+    SET_OP(table, 0xB9, RES_7_C, regs, "RES 7 C", 2, 8, 0);
+    SET_OP(table, 0xBA, RES_7_D, regs, "RES 7 D", 2, 8, 0);
+    SET_OP(table, 0xBB, RES_7_E, regs, "RES 7 E", 2, 8, 0);
+    SET_OP(table, 0xBC, RES_7_H, regs, "RES 7 H", 2, 8, 0);
+    SET_OP(table, 0xBD, RES_7_L, regs, "RES 7 L", 2, 8, 0);
+    SET_OP(table, 0xBE, RES_7_mHL, regs, "RES 7 mHL", 2, 16, 0);
+    SET_OP(table, 0xBF, RES_7_A, regs, "RES 7 A", 2, 8, 0);
 
-    SET_OP(table, 0xC0, SET_0_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0xC1, SET_0_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0xC2, SET_0_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0xC3, SET_0_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0xC4, SET_0_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0xC5, SET_0_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0xC6, SET_0_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0xC7, SET_0_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0xC8, SET_1_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0xC9, SET_1_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0xCA, SET_1_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0xCB, SET_1_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0xCC, SET_1_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0xCD, SET_1_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0xCE, SET_1_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0xCF, SET_1_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0xC0, SET_0_B, regs, "SET 0 B", 2, 8, 0);
+    SET_OP(table, 0xC1, SET_0_C, regs, "SET 0 C", 2, 8, 0);
+    SET_OP(table, 0xC2, SET_0_D, regs, "SET 0 D", 2, 8, 0);
+    SET_OP(table, 0xC3, SET_0_E, regs, "SET 0 E", 2, 8, 0);
+    SET_OP(table, 0xC4, SET_0_H, regs, "SET 0 H", 2, 8, 0);
+    SET_OP(table, 0xC5, SET_0_L, regs, "SET 0 L", 2, 8, 0);
+    SET_OP(table, 0xC6, SET_0_mHL, regs, "SET 0 mHL", 2, 16, 0);
+    SET_OP(table, 0xC7, SET_0_A, regs, "SET 0 A", 2, 8, 0);
+    SET_OP(table, 0xC8, SET_1_B, regs, "SET 1 B", 2, 8, 0);
+    SET_OP(table, 0xC9, SET_1_C, regs, "SET 1 C", 2, 8, 0);
+    SET_OP(table, 0xCA, SET_1_D, regs, "SET 1 D", 2, 8, 0);
+    SET_OP(table, 0xCB, SET_1_E, regs, "SET 1 E", 2, 8, 0);
+    SET_OP(table, 0xCC, SET_1_H, regs, "SET 1 H", 2, 8, 0);
+    SET_OP(table, 0xCD, SET_1_L, regs, "SET 1 L", 2, 8, 0);
+    SET_OP(table, 0xCE, SET_1_mHL, regs, "SET 1 mHL", 2, 16, 0);
+    SET_OP(table, 0xCF, SET_1_A, regs, "SET 1 A", 2, 8, 0);
 
-    SET_OP(table, 0xD0, SET_2_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0xD1, SET_2_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0xD2, SET_2_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0xD3, SET_2_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0xD4, SET_2_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0xD5, SET_2_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0xD6, SET_2_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0xD7, SET_2_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0xD8, SET_3_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0xD9, SET_3_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0xDA, SET_3_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0xDB, SET_3_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0xDC, SET_3_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0xDD, SET_3_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0xDE, SET_3_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0xDF, SET_3_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0xD0, SET_2_B, regs, "SET 2 B", 2, 8, 0);
+    SET_OP(table, 0xD1, SET_2_C, regs, "SET 2 C", 2, 8, 0);
+    SET_OP(table, 0xD2, SET_2_D, regs, "SET 2 D", 2, 8, 0);
+    SET_OP(table, 0xD3, SET_2_E, regs, "SET 2 E", 2, 8, 0);
+    SET_OP(table, 0xD4, SET_2_H, regs, "SET 2 H", 2, 8, 0);
+    SET_OP(table, 0xD5, SET_2_L, regs, "SET 2 L", 2, 8, 0);
+    SET_OP(table, 0xD6, SET_2_mHL, regs, "SET 2 mHL", 2, 16, 0);
+    SET_OP(table, 0xD7, SET_2_A, regs, "SET 2 A", 2, 8, 0);
+    SET_OP(table, 0xD8, SET_3_B, regs, "SET 3 B", 2, 8, 0);
+    SET_OP(table, 0xD9, SET_3_C, regs, "SET 3 C", 2, 8, 0);
+    SET_OP(table, 0xDA, SET_3_D, regs, "SET 3 D", 2, 8, 0);
+    SET_OP(table, 0xDB, SET_3_E, regs, "SET 3 E", 2, 8, 0);
+    SET_OP(table, 0xDC, SET_3_H, regs, "SET 3 H", 2, 8, 0);
+    SET_OP(table, 0xDD, SET_3_L, regs, "SET 3 L", 2, 8, 0);
+    SET_OP(table, 0xDE, SET_3_mHL, regs, "SET 3 mHL", 2, 16, 0);
+    SET_OP(table, 0xDF, SET_3_A, regs, "SET 3 A", 2, 8, 0);
 
-    SET_OP(table, 0xE0, SET_4_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0xE1, SET_4_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0xE2, SET_4_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0xE3, SET_4_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0xE4, SET_4_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0xE5, SET_4_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0xE6, SET_4_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0xE7, SET_4_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0xE8, SET_5_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0xE9, SET_5_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0xEA, SET_5_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0xEB, SET_5_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0xEC, SET_5_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0xED, SET_5_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0xEE, SET_5_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0xEF, SET_5_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0xE0, SET_4_B, regs, "SET 4 B", 2, 8, 0);
+    SET_OP(table, 0xE1, SET_4_C, regs, "SET 4 C", 2, 8, 0);
+    SET_OP(table, 0xE2, SET_4_D, regs, "SET 4 D", 2, 8, 0);
+    SET_OP(table, 0xE3, SET_4_E, regs, "SET 4 E", 2, 8, 0);
+    SET_OP(table, 0xE4, SET_4_H, regs, "SET 4 H", 2, 8, 0);
+    SET_OP(table, 0xE5, SET_4_L, regs, "SET 4 L", 2, 8, 0);
+    SET_OP(table, 0xE6, SET_4_mHL, regs, "SET 4 mHL", 2, 16, 0);
+    SET_OP(table, 0xE7, SET_4_A, regs, "SET 4 A", 2, 8, 0);
+    SET_OP(table, 0xE8, SET_5_B, regs, "SET 5 B", 2, 8, 0);
+    SET_OP(table, 0xE9, SET_5_C, regs, "SET 5 C", 2, 8, 0);
+    SET_OP(table, 0xEA, SET_5_D, regs, "SET 5 D", 2, 8, 0);
+    SET_OP(table, 0xEB, SET_5_E, regs, "SET 5 E", 2, 8, 0);
+    SET_OP(table, 0xEC, SET_5_H, regs, "SET 5 H", 2, 8, 0);
+    SET_OP(table, 0xED, SET_5_L, regs, "SET 5 L", 2, 8, 0);
+    SET_OP(table, 0xEE, SET_5_mHL, regs, "SET 5 mHL", 2, 16, 0);
+    SET_OP(table, 0xEF, SET_5_A, regs, "SET 5 A", 2, 8, 0);
 
-    SET_OP(table, 0xF0, SET_6_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0xF1, SET_6_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0xF2, SET_6_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0xF3, SET_6_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0xF4, SET_6_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0xF5, SET_6_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0xF6, SET_6_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0xF7, SET_6_A, regs, "", 2, 8, 0);
-    SET_OP(table, 0xF8, SET_7_B, regs, "", 2, 8, 0);
-    SET_OP(table, 0xF9, SET_7_C, regs, "", 2, 8, 0);
-    SET_OP(table, 0xFA, SET_7_D, regs, "", 2, 8, 0);
-    SET_OP(table, 0xFB, SET_7_E, regs, "", 2, 8, 0);
-    SET_OP(table, 0xFC, SET_7_H, regs, "", 2, 8, 0);
-    SET_OP(table, 0xFD, SET_7_L, regs, "", 2, 8, 0);
-    SET_OP(table, 0xFE, SET_7_mHL, regs, "", 2, 16, 0);
-    SET_OP(table, 0xFF, SET_7_A, regs, "", 2, 8, 0);
+    SET_OP(table, 0xF0, SET_6_B, regs, "SET 6 B", 2, 8, 0);
+    SET_OP(table, 0xF1, SET_6_C, regs, "SET 6 C", 2, 8, 0);
+    SET_OP(table, 0xF2, SET_6_D, regs, "SET 6 D", 2, 8, 0);
+    SET_OP(table, 0xF3, SET_6_E, regs, "SET 6 E", 2, 8, 0);
+    SET_OP(table, 0xF4, SET_6_H, regs, "SET 6 H", 2, 8, 0);
+    SET_OP(table, 0xF5, SET_6_L, regs, "SET 6 L", 2, 8, 0);
+    SET_OP(table, 0xF6, SET_6_mHL, regs, "SET 6 mHL", 2, 16, 0);
+    SET_OP(table, 0xF7, SET_6_A, regs, "SET 6 A", 2, 8, 0);
+    SET_OP(table, 0xF8, SET_7_B, regs, "SET 7 B", 2, 8, 0);
+    SET_OP(table, 0xF9, SET_7_C, regs, "SET 7 C", 2, 8, 0);
+    SET_OP(table, 0xFA, SET_7_D, regs, "SET 7 D", 2, 8, 0);
+    SET_OP(table, 0xFB, SET_7_E, regs, "SET 7 E", 2, 8, 0);
+    SET_OP(table, 0xFC, SET_7_H, regs, "SET 7 H", 2, 8, 0);
+    SET_OP(table, 0xFD, SET_7_L, regs, "SET 7 L", 2, 8, 0);
+    SET_OP(table, 0xFE, SET_7_mHL, regs, "SET 7 mHL", 2, 16, 0);
+    SET_OP(table, 0xFF, SET_7_A, regs, "SET 7 A", 2, 8, 0);
 }
 
 // void ExecuteOpcode(cpu_t* cpu, uint8_t opcode) {

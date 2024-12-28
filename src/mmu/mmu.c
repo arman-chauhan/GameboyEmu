@@ -20,7 +20,9 @@ mmu_t* mmu_create(void) {
 }
 // void mmu_init(mmu_t* mmu) { return &ctx; }
 
-uint8_t readROM(uint16_t addr) { return ctx.addr[addr]; }
+uint8_t readROM(uint16_t addr) {
+    return ctx.addr[addr];
+}
 
 uint8_t readVRAM(uint16_t addr) { return ctx.addr[addr]; }
 
@@ -30,7 +32,10 @@ uint8_t readWRAM(uint16_t addr) { return ctx.addr[addr]; }
 
 uint8_t readOAM(uint16_t addr) { return ctx.addr[addr]; }
 
-uint8_t readIOPorts(uint16_t addr) { return ctx.addr[addr]; }
+uint8_t readIOPorts(uint16_t addr) {
+
+    return ctx.addr[addr];
+}
 
 uint8_t readHRAM(uint16_t addr) { return ctx.addr[addr]; }
 
@@ -68,9 +73,48 @@ uint8_t mmu_readU8(uint16_t addr) {
     }
 }
 
+uint8_t ly = 0;
+// todo: hardcoded ly at ff44
+uint8_t MMU_ReadIO(const uint8_t addr) {
+    if (addr < 0x00 || addr > 0xff) {
+        Log("Error: address not in range");
+        exit(-1);
+    }
+
+    // if (addr == 0x44) {
+    //     Log("value ' %i", ctx.io_regs[addr]);
+    // }
+
+    return ctx.io_regs[addr];
+}
+
 int8_t mmu_readI8(uint16_t addr) { return (int8_t)ctx.addr[addr]; }
 
 uint16_t mmu_readU16(const uint16_t addr) { return mmu_readU8(addr + 1) << 8 | mmu_readU8(addr); }
+
+void MMU_WriteIO(const uint8_t addr, const uint8_t value) {
+    if (addr < 0x00 || addr > 0xff) {
+        Log("Error: address not in range\n");
+        exit(-1);
+    }
+
+    if (addr == 0x44) {
+        printf("Writes to LY register are ignored.");
+        return;
+    }
+
+    if (addr + 0xFF00 == 0xFF04) {
+        ctx.io_regs[addr] = 0;
+        timer_t* timer = GetTimer();
+        timer->divider_counter = 0;
+        return;
+    }
+
+    if (addr + 0xFF00 == 0xFF46) {
+        dma_start(value);
+    }
+    ctx.io_regs[addr] = value;
+}
 
 void MMU_WriteU8(const uint16_t addr, const uint8_t value) {
     if (addr == 0xFF44) {

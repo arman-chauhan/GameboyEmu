@@ -24,7 +24,7 @@ void cpu_init(cpu_t* cpu) {
     cpu->regs.H = 0x01;
     cpu->regs.L = 0x4D;
     cpu->regs.SP = 0xFFFE;
-    cpu->regs.PC = 0x0100;
+    cpu->regs.PC = 0; // 0x100;
     cpu->halt = 0;
     cpu->stop = 0;
     cpu->IME = 0;

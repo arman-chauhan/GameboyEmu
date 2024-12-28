@@ -1,28 +1,38 @@
 cmake_minimum_required(VERSION 3.28)
-project(boy C)
+project(GameBoy C)
 
 set(CMAKE_C_STANDARD 11)
 
-# Specify the include directories
-include_directories(include)
+file(GLOB SOURCES
+        src/*.c
+        src/cpu/*.c
+        src/mmu/*.c
+        src/ppu/*.c
+        src/debug/*.c
+)
 
-# Gather all source files in the src directory
-file(GLOB SOURCES "src/*.c")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_executable(GameBoy ${SOURCES} ${HEADERS} lib/libraylib.a
+        src/ppu/ppu.h
+        src/ppu/ppu.c
+        src/ppu/fetcher.h
+        src/ppu/fifo.h
+        src/ppu/raylib.h)
 
-# Check if any source files were found
-if(NOT SOURCES)
-    message(FATAL_ERROR "No source files found in the 'src' directory.")
-endif()
+target_include_directories(
+        GameBoy PRIVATE
+        src
+        src/cpu
+        src/mmu
+        src/ppu
+        src/debug
+)
 
-# Add the raylib library as an imported static library
 add_library(raylib STATIC IMPORTED)
 set_target_properties(raylib PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libraylib.a")
-
-# Create the executable
-add_executable(Game-boy ${SOURCES})
-
-# Link the raylib library to the executable
-target_link_libraries(Game-boy raylib)
-
-# Optional: Enable clang-tidy
-set(CMAKE_C_CLANG_TIDY "clang-tidy;-checks=*")
+target_link_libraries(GameBoy PRIVATE
+        raylib
+        "-framework IOKit"
+        "-framework Cocoa"
+        "-framework OpenGL"
+)

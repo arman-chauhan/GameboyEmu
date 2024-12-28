@@ -1,42 +1,77 @@
-CC := clang
+# Compiler settings
+CC = gcc
+CFLAGS = -std=c11 -Wall -Wextra
 
-SRC_DIR := ./src
-BIN_DIR := ./build
-INC_DIR := ./include
-OBJS_DIR := $(BIN_DIR)/objs
-LIB = -Llib -lraylib
+# Directories
+BUILD_DIR = build
+SRC_DIR = src
+CPU_DIR = $(SRC_DIR)/cpu
+MMU_DIR = $(SRC_DIR)/mmu
+PPU_DIR = $(SRC_DIR)/ppu
+DEBUG_DIR = $(SRC_DIR)/debug
+LIB_DIR = lib
 
-SRCS := $(wildcard $(SRC_DIR)/*.c)
-OBJS := $(SRCS:$(SRC_DIR)/%.c=$(OBJS_DIR)/%.o)
+# Include paths
+INCLUDES = -I$(SRC_DIR) \
+           -I$(CPU_DIR) \
+           -I$(MMU_DIR) \
+           -I$(PPU_DIR) \
+           -I$(DEBUG_DIR)
 
-CFLAGS := -I$(INC_DIR)  -Wall -Wextra -Wshadow -pedantic -Werror
-LDFLAGS := $(LIB)
+# Source files
+SOURCES = $(wildcard $(SRC_DIR)/*.c) \
+          $(wildcard $(CPU_DIR)/*.c) \
+          $(wildcard $(MMU_DIR)/*.c) \
+          $(wildcard $(PPU_DIR)/*.c) \
+          $(wildcard $(DEBUG_DIR)/*.c)
 
-TARGET := $(BIN_DIR)/gameboy
+# Object files (in build directory)
+OBJECTS = $(SOURCES:%.c=$(BUILD_DIR)/%.o)
 
-PLATFORM := $(shell uname)
-ifeq ($(PLATFORM), Darwin)
-	LDFLAGS += -framework Cocoa -framework IOKit
-else ifeq ($(PLATFORM), Linux)
-	# Add any Linux-specific flags here if needed
-	# LDFLAGS +=
-endif
+# Dependency files
+DEPS = $(OBJECTS:.o=.d)
 
-# Default target: build the target executable
-all: $(TARGET)
+# macOS specific frameworks
+FRAMEWORKS = -framework IOKit -framework Cocoa -framework OpenGL
 
-# Link object files to create the executable
-$(TARGET): $(OBJS)
-	@mkdir -p $(BIN_DIR)
-	$(CC) -o $@ $^ $(LDFLAGS)
+# Target executable (in root directory)
+TARGET = GameBoy
 
-# Compile source files into object files
-$(OBJS_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(OBJS_DIR)
-	$(CC) -c $< -o $@ $(CFLAGS)
+# Default target
+all: $(BUILD_DIR) $(TARGET)
 
-# Clean build files
+# Create build directory structure
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)/$(SRC_DIR)
+	mkdir -p $(BUILD_DIR)/$(CPU_DIR)
+	mkdir -p $(BUILD_DIR)/$(MMU_DIR)
+	mkdir -p $(BUILD_DIR)/$(PPU_DIR)
+	mkdir -p $(BUILD_DIR)/$(DEBUG_DIR)
+
+# Linking
+$(TARGET): $(OBJECTS)
+	$(CC) $(OBJECTS) $(LIB_DIR)/libraylib.a $(FRAMEWORKS) -o $(TARGET)
+
+# Compilation
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# Clean
 clean:
-	rm -rf $(BIN_DIR)
+	rm -rf $(BUILD_DIR)
+	rm -f $(TARGET)
 
+# Phony targets
 .PHONY: all clean
+
+# Dependencies
+-include $(DEPS)
+
+# Generate dependency files
+$(BUILD_DIR)/%.d: %.c
+	@mkdir -p $(dir $@)
+	@set -e; rm -f $@; \
+	$(CC) -MM $(CFLAGS) $(INCLUDES) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,$(BUILD_DIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$

@@ -201,10 +201,10 @@ void LD_HL_SP8IM(regs_t* regs) {
     modify_flag(&regs->F, FLAG_C, bit7overflow);
 }
 
-void LD_FF00_C_A(regs_t* regs) { MMU_WriteIO(regs->C, regs->A); }           // Ex02
-void LD_A_FFOO_C(regs_t* regs) { regs->A = MMU_ReadIO(regs->C); }           // Fx02
-void LD_A_FF00_8IM(regs_t* regs) { regs->A = MMU_ReadIO(IM_U8(regs->PC)); } // Fx00
-void LD_FF00_8IM_A(regs_t* regs) { MMU_WriteIO(IM_U8(regs->PC), regs->A); } // Ex00
+void LD_FF00_C_A(regs_t* regs) { MMU_WriteU8(0xFF00 + regs->C, regs->A); }           // Ex02
+void LD_A_FFOO_C(regs_t* regs) { regs->A = mmu_readU8(0xFF00 + regs->C); }           // Fx02
+void LD_A_FF00_8IM(regs_t* regs) { regs->A = mmu_readU8(0xFF00 + IM_U8(regs->PC)); } // Fx00
+void LD_FF00_8IM_A(regs_t* regs) { MMU_WriteU8(0xFF00 + IM_U8(regs->PC), regs->A); } // Ex00
 
 //==================================================================================================================
 //
@@ -1095,20 +1095,28 @@ void RET(regs_t* regs) {
 } // Cx09
 
 void RET_C(regs_t* regs) {
-    if (regs->F & (1 << FLAG_C)) { RET(regs); }
+    if (regs->F & (1 << FLAG_C)) {
+        RET(regs);
+    }
 } // Dx08
 void RET_Z(regs_t* regs) {
-    if (regs->F & (1 << FLAG_Z)) { RET(regs); }
+    if (regs->F & (1 << FLAG_Z)) {
+        RET(regs);
+    }
 } // Cx08
 void RET_NC(regs_t* regs) {
-    if (!(regs->F & (1 << FLAG_C))) { RET(regs); }
+    if (!(regs->F & (1 << FLAG_C))) {
+        RET(regs);
+    }
 } // Dx00
 void RET_NZ(regs_t* regs) {
-    if (!(regs->F & (1 << FLAG_Z))) { RET(regs); }
+    if (!(regs->F & (1 << FLAG_Z))) {
+        RET(regs);
+    }
 } // Cx00
 
 void rst(const uint8_t addr, uint16_t* PC, uint16_t* SP) {
-    PUSH_R16(*PC + 1 , SP);
+    PUSH_R16(*PC + 1, SP);
     *PC = addr;
     pc_udated_needed = 0;
 }
@@ -1139,14 +1147,20 @@ void RETI(cpu_t* cpu) {
 
 void DAA(regs_t* regs) {
     if (regs->F & (1 << FLAG_N)) {
-        if (regs->F & (1 << FLAG_C)) { regs->A -= 0x60; }
-        if (regs->F & (1 << FLAG_H)) { regs->A -= 0x06; }
+        if (regs->F & (1 << FLAG_C)) {
+            regs->A -= 0x60;
+        }
+        if (regs->F & (1 << FLAG_H)) {
+            regs->A -= 0x06;
+        }
     } else {
         if ((regs->F & (1 << FLAG_C)) || regs->A > 0x99) {
             regs->A += 0x60;
             set_flag(&regs->F, FLAG_C);
         }
-        if ((regs->F & (1 << FLAG_H)) || (regs->A & 0x0F) > 0x09) { regs->A += 0x06; }
+        if ((regs->F & (1 << FLAG_H)) || (regs->A & 0x0F) > 0x09) {
+            regs->A += 0x06;
+        }
     }
     clear_flag(&regs->F, FLAG_H);
     modify_flag(&regs->F, FLAG_Z, regs->A == 0);
@@ -1184,10 +1198,17 @@ void UNKNOWN(regs_t* regs) {
     inst_ptr[opcode].cycle[0] = (cycle1);                                                          \
     inst_ptr[opcode].cycle[1] = (cycle2);                                                          \
     switch (param_type) {                                                                          \
-    case CONTEXT_CPU: inst_ptr[opcode].execute.ctx_cpu = (void (*)(cpu_t*))handler; break;         \
-    case CONTEXT_REGS: inst_ptr[opcode].execute.ctx_regs = (void (*)(regs_t*))handler; break;      \
-    case CONTEXT_MMU: inst_ptr[opcode].execute.ctx_mmu = (void (*)(cpu_t*, mmu_t*))handler; break; \
-    default: break;                                                                                \
+    case CONTEXT_CPU:                                                                              \
+        inst_ptr[opcode].execute.ctx_cpu = (void (*)(cpu_t*))handler;                              \
+        break;                                                                                     \
+    case CONTEXT_REGS:                                                                             \
+        inst_ptr[opcode].execute.ctx_regs = (void (*)(regs_t*))handler;                            \
+        break;                                                                                     \
+    case CONTEXT_MMU:                                                                              \
+        inst_ptr[opcode].execute.ctx_mmu = (void (*)(cpu_t*, mmu_t*))handler;                      \
+        break;                                                                                     \
+    default:                                                                                       \
+        break;                                                                                     \
     }
 
 instruction_t instruction_table[256];

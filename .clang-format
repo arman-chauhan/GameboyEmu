@@ -1,12 +1,12 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
 UseTab: Never
-ColumnLimit: 80
-AllowShortBlocksOnASingleLine: true
-AllowShortCaseLabelsOnASingleLine: true
-AllowShortIfStatementsOnASingleLine: true
-AllowShortLoopsOnASingleLine: true
-BreakBeforeBraces: Attach
+ColumnLimit: 100
+#AllowShortBlocksOnASingleLine: Always
+#AllowShortCaseLabelsOnASingleLine: true
+#AllowShortIfStatementsOnASingleLine: true
+#AllowShortLoopsOnASingleLine: true
+#BreakBeforeBraces: Attach
 DerivePointerAlignment: false
 PointerAlignment: Left
-
+AlignConsecutiveMacros: Consecutive

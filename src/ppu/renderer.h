@@ -4,6 +4,7 @@
 #include "emu.h"
 
 void renderer_init();
+void renderVRAM(GameBoyState *state);
 void RenderFrame(GameBoyState* state, u8 frameBuffer[]);
 
 void HBlank();

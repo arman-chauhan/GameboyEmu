@@ -35,6 +35,20 @@ void ppu_init(ppu_t* ppu, mmu_t* mmu) {
     ppu->x_pos = 0;
 }
 
+u16 get_tile_map(ppu_t* ppu) {
+    bool windowEnabled = GET_BIT(*ppu->lcdc, 5);
+    if (windowEnabled && ppu->x_pos >= *ppu->wx && GET_BIT(*ppu->lcdc, 6)) {
+        return 0x9C00;
+    }
+
+    if (!windowEnabled && GET_BIT(*ppu->lcdc, 3)) {
+        return 0x9C00;
+    }
+    return 0x9800;
+}
+
+
+
 void ppu_tick(ppu_t* ppu, u8 cycles) {
     for (u8 i = 0; i < cycles; i++) {
         ppu->ticks++;
@@ -44,8 +58,9 @@ void ppu_tick(ppu_t* ppu, u8 cycles) {
 
             if (ppu->ticks == 80) {
                 ppu->x_pos = 0;
-                u8 tileLine = *ppu->ly % 8;
-                u16 tileMapAddr = 0x9800 + ((*ppu->ly / 8) * 32);
+                u8 y = (*ppu->ly + *ppu->scy) & 0xff;
+                u8 tileLine = y % 8;
+                u16 tileMapAddr = get_tile_map(ppu) + ((y / 8) * 32) ;
                 fetcher_start(&ppu->fetcher, tileMapAddr, tileLine);
 
                 ppu->state = PIXEL_TRANSFER;
@@ -53,17 +68,16 @@ void ppu_tick(ppu_t* ppu, u8 cycles) {
             break;
         case PIXEL_TRANSFER:
             fetcher_tick(&ppu->fetcher);
-
             if (ppu->fetcher.fifo.size > 8) {
-                // RenderPixel(fifo_pop(&ppu->fetcher.fifo));
                 u8 f = fifo_pop(&ppu->fetcher.fifo);
+                f = (*ppu->bgp >> f * 2) & 0x3; // Pick color from palette
                 ppu->pixel_data[*ppu->ly * 160 + ppu->x_pos] = f;
                 Write(f);
                 ppu->x_pos++;
             }
             if (ppu->x_pos == 160) {
-                // RendererHblank();
                 HBlank();
+                fifo_clear(&ppu->fetcher.fifo);
                 ppu->state = HBLANK;
             }
             break;
@@ -72,7 +86,6 @@ void ppu_tick(ppu_t* ppu, u8 cycles) {
                 ppu->ticks = 0;
                 (*ppu->ly)++;
                 if (*ppu->ly == 144) {
-                    // RendererVblank();
                     VBlank();
 
                     ppu->state = VBLANK;

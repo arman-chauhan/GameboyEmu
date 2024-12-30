@@ -12,13 +12,23 @@
 #define COL_COUNT  160
 #define TILE_COUNT (ROW_COUNT * COL_COUNT)
 
-void renderer_init() { InitWindow(COL_COUNT * SCALE, ROW_COUNT * SCALE, "Gameboy"); }
+void renderer_init() {
+    InitWindow(COL_COUNT * SCALE, ROW_COUNT * SCALE, "Gameboy"); // Gameboy window
+    // InitWindow(16 * 8 * SCALE, 24 * 8 * SCALE, "Gameboy-debug"); // Debug window
+    SetTargetFPS(60);
+}
 
-const Color colors[] = {WHITE, RED, DARKGRAY, BLACK};
+// const Color colors[] = {WHITE, SKYBLUE, ORANGE, BLACK};
+const Color colors[] = {
+    {224, 248, 208, 255},
+    {136, 192, 112, 255},
+    {52, 104, 86, 255},
+    {8, 24, 32, 255},
+};
 
 void RenderFrame(GameBoyState* state, u8 frameBuffer[]) {
     BeginDrawing();
-    ClearBackground(BLACK);
+    ClearBackground(RED);
 
     for (int y = 0; y < ROW_COUNT; y++) {
         for (int x = 0; x < COL_COUNT; x++) {
@@ -34,8 +44,8 @@ void RenderFrame(GameBoyState* state, u8 frameBuffer[]) {
 }
 
 uint16_t addr = 0x8000;
-void get_tiles(uint16_t tiles[TILE_COUNT][8]) {
-    for (int tile_idx = 0; tile_idx < TILE_COUNT; tile_idx++) {
+void get_tiles(uint16_t tiles[384][8]) {
+    for (int tile_idx = 0; tile_idx < 384; tile_idx++) {
         for (int i = 0; i < TILE_LEN; i++) {
             const uint8_t hi = mmu_readU8(addr + tile_idx * 16 + i * 2 + 1);
             const uint8_t lo = mmu_readU8(addr + tile_idx * 16 + i * 2);
@@ -48,10 +58,10 @@ void get_tiles(uint16_t tiles[TILE_COUNT][8]) {
     }
 }
 
-void draw_vram_tiles(uint16_t tiles[TILE_COUNT][8]) {
-    for (int i = 0; i < TILE_COUNT; i++) {
-        const uint16_t screenX = (i % COL_COUNT) * 8 * SCALE;
-        const uint16_t screenY = (i / COL_COUNT) * 8 * SCALE;
+void draw_vram_tiles(uint16_t tiles[384][8]) {
+    for (int i = 0; i < 384; i++) {
+        const uint16_t screenX = (i % 16) * 8 * SCALE;
+        const uint16_t screenY = (i / 16) * 8 * SCALE;
 
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
@@ -63,11 +73,16 @@ void draw_vram_tiles(uint16_t tiles[TILE_COUNT][8]) {
     }
 }
 
-void renderVRAM() {
+void renderVRAM(GameBoyState* state) {
     uint16_t tiles[384][8] = {0};
-
+    BeginDrawing();
+    ClearBackground(RED);
     get_tiles(tiles);
     draw_vram_tiles(tiles);
+    EndDrawing();
+
+    if (WindowShouldClose())
+        state->terminate = 1;
 }
 
 

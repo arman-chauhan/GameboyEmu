@@ -17,19 +17,24 @@
 #define IO_REGS_SIZE      0x0080  // 128 bytes for I/O registers
 #define HIGH_RAM_SIZE     0x007F  // 127 bytes for High RAM (HRAM)
 
-typedef union memory_t {
-    uint8_t addr[MEM_SIZE]; // Raw address access
-    struct {
-        uint8_t rom[ROM_NUM][ROM_BANK_SIZE]; // Cartridge ROM (multiple banks)
-        uint8_t vram[VRAM_SIZE];             // Video RAM (VAM)
-        uint8_t sram[EXTERNAL_RAM_SIZE];     // External RAM (SRAM)
-        uint8_t wram[WRAM_SIZE];             // Work RAM (WRAM)
-        uint8_t echo_ram[ECHO_RAM_SIZE];     // Echo RAM, mirror of work ram
-        uint8_t oam[OAM_SIZE];               // Object Attribute Memory (OAM)
-        uint8_t unused[UNUSED_SIZE];         // Unused memory space
-        uint8_t io_regs[IO_REGS_SIZE];       // I/O registers
-        uint8_t hram[HIGH_RAM_SIZE];         // High RAM (HRAM)
-        uint8_t ie_reg;                      // Interrupt Enable Register, 0xFFFF
+typedef struct GameBoyState GameBoyState;;
+
+typedef struct memory_t {
+    GameBoyState *gb;  // Keep this as a regular member, not in union
+    union {
+        uint8_t addr[MEM_SIZE]; // Raw address access
+        struct {
+            uint8_t rom[ROM_NUM][ROM_BANK_SIZE];
+            uint8_t vram[VRAM_SIZE];
+            uint8_t sram[EXTERNAL_RAM_SIZE];
+            uint8_t wram[WRAM_SIZE];
+            uint8_t echo_ram[ECHO_RAM_SIZE];
+            uint8_t oam[OAM_SIZE];
+            uint8_t unused[UNUSED_SIZE];
+            uint8_t io_regs[IO_REGS_SIZE];
+            uint8_t hram[HIGH_RAM_SIZE];
+            uint8_t ie_reg;
+        };
     };
 } mmu_t;
 

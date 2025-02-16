@@ -1,32 +1,11 @@
 #ifndef FETCHER_H
 #define FETCHER_H
-
 #include <common.h>
-#include <fifo.h>
-
-enum FetcherState {
-    ReadTileID,
-    ReadTileData0,
-    ReadTileData1,
-    PushToFIFO,
-};
+#include <ppu.h>
 
 
 
-typedef struct {
-    enum FetcherState state;
-    fifo_t fifo;
-    u8 ticks;
-
-    u16 mapAddr;
-    u8 tileLine;
-    u16 tileIndex;
-    u8 tileID;
-    u8 tileLineLow;
-    u8 tileLineHigh;
-} fetcher_t;
-
-void fetcher_tick(fetcher_t *);
-void fetcher_start(fetcher_t *fetcher, u16 tileMapAddr, u8 tileLine);
+void fetcher_tick(ppu_t* ppu, fetcher_t* fetcher);
+void fetcher_start(fetcher_t* fetcher, u16 tileMapAddr, u16 tileData, u8 tileOffset, u8 tileLine);
 
 #endif

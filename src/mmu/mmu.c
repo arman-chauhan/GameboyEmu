@@ -1,14 +1,16 @@
 #include "mmu.h"
 
+#include "ppu.h"
+#include "timer.h"
+#include "utils.h"
 #include <dma.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "timer.h"
-#include "utils.h"
+#include <emu.h>
 
-static mmu_t ctx;
+static mmu_t mmu;
 
 mmu_t* mmu_create(void) {
     // mmu_t* mmu = malloc(sizeof(mmu));
@@ -16,28 +18,23 @@ mmu_t* mmu_create(void) {
     //     Log("Failed to allocate the mmu!");
     //     exit(EXIT_FAILURE);
     // }
-    return &ctx;
+    return &mmu;
 }
 // void mmu_init(mmu_t* mmu) { return &ctx; }
 
-uint8_t readROM(uint16_t addr) {
-    return ctx.addr[addr];
-}
+uint8_t readROM(uint16_t addr) { return mmu.addr[addr]; }
 
-uint8_t readVRAM(uint16_t addr) { return ctx.addr[addr]; }
+uint8_t readVRAM(uint16_t addr) { return mmu.addr[addr]; }
 
-uint8_t readExternalRAM(uint16_t addr) { return ctx.addr[addr]; }
+uint8_t readExternalRAM(uint16_t addr) { return mmu.addr[addr]; }
 
-uint8_t readWRAM(uint16_t addr) { return ctx.addr[addr]; }
+uint8_t readWRAM(uint16_t addr) { return mmu.addr[addr]; }
 
-uint8_t readOAM(uint16_t addr) { return ctx.addr[addr]; }
+uint8_t readOAM(uint16_t addr) { return mmu.addr[addr]; }
 
-uint8_t readIOPorts(uint16_t addr) {
+uint8_t readIOPorts(uint16_t addr) { return mmu.addr[addr]; }
 
-    return ctx.addr[addr];
-}
-
-uint8_t readHRAM(uint16_t addr) { return ctx.addr[addr]; }
+uint8_t readHRAM(uint16_t addr) { return mmu.addr[addr]; }
 
 uint8_t mmu_readU8(uint16_t addr) {
     if (addr <= 0x7FFF) {
@@ -58,7 +55,11 @@ uint8_t mmu_readU8(uint16_t addr) {
     } else if (addr >= 0xFE00 && addr <= 0xFE9F) {
         // OAM: 0xFE00-0xFE9F
         return readOAM(addr);
-    } else if (addr >= 0xFF00 && addr <= 0xFF7F) {
+    } // else if(addr >= 0xFE0A) {
+    //     Log("Questionable memory access!!!");
+    //     return ctx.addr[addr];
+    // }
+    else if (addr >= 0xFF00 && addr <= 0xFF7F) {
         // I/O Ports: 0xFF00-0xFF7F
         return readIOPorts(addr);
     } else if (addr >= 0xFF80 && addr <= 0xFFFE) {
@@ -66,7 +67,7 @@ uint8_t mmu_readU8(uint16_t addr) {
         return readHRAM(addr);
     } else if (addr == 0xFFFF) {
         // Interrupt Enable Register: 0xFFFF
-        return ctx.ie_reg;
+        return mmu.ie_reg;
     } else {
         Log("Invalid memory read at address: 0x%04X\n", addr);
         exit(EXIT_FAILURE);
@@ -85,10 +86,10 @@ uint8_t MMU_ReadIO(const uint8_t addr) {
     //     Log("value ' %i", ctx.io_regs[addr]);
     // }
 
-    return ctx.io_regs[addr];
+    return mmu.io_regs[addr];
 }
 
-int8_t mmu_readI8(uint16_t addr) { return (int8_t)ctx.addr[addr]; }
+int8_t mmu_readI8(uint16_t addr) { return (int8_t)mmu.addr[addr]; }
 
 uint16_t mmu_readU16(const uint16_t addr) { return mmu_readU8(addr + 1) << 8 | mmu_readU8(addr); }
 
@@ -104,7 +105,7 @@ void MMU_WriteIO(const uint8_t addr, const uint8_t value) {
     }
 
     if (addr + 0xFF00 == 0xFF04) {
-        ctx.io_regs[addr] = 0;
+        mmu.io_regs[addr] = 0;
         timer_t* timer = GetTimer();
         timer->divider_counter = 0;
         return;
@@ -113,18 +114,29 @@ void MMU_WriteIO(const uint8_t addr, const uint8_t value) {
     if (addr + 0xFF00 == 0xFF46) {
         dma_start(value);
     }
-    ctx.io_regs[addr] = value;
+    mmu.io_regs[addr] = value;
 }
 
 void MMU_WriteU8(const uint16_t addr, const uint8_t value) {
     if (addr == 0xFF44) {
-        printf("Writes to LY register are ignored.");
+        Log("Writes to LY register are ignored.");
         return;
     }
-    ctx.addr[addr] = value;
+    if (addr == 0xFF41) {
+        mmu.gb->ppu->stat_ie = 0xff;
+        eval_stat(mmu.gb->ppu);
+
+        mmu.gb->ppu->stat_ie = value & 0b01111000;
+        eval_stat(mmu.gb->ppu);
+    }
+    if (addr == 0xFF45) {
+        eval_stat(mmu.gb->ppu);
+    }
+
+    mmu.addr[addr] = value;
 }
 
 void MMU_WriteU16(const uint16_t addr, const uint16_t value) {
-    ctx.addr[addr] = (uint8_t)value & 0xff;
-    ctx.addr[addr + 1] = (uint8_t)(value >> 8);
+    MMU_WriteU8(addr, (uint8_t)value & 0xff);
+    MMU_WriteU8(addr + 1, (uint8_t)(value >> 8));
 }

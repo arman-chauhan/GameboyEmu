@@ -22,6 +22,7 @@ bool read_cart(char* path, mmu_t* mmu) {
     const size_t bytesRead = fread(mmu->rom, 1, file_size, file);
     if (bytesRead != file_size) {
         Log("Expected %zu bytes, but read %zu bytes", file_size, bytesRead);
+        perror("Failed ");
         fclose(file);
         return false;
     }
@@ -32,7 +33,7 @@ bool read_cart(char* path, mmu_t* mmu) {
         checksum = checksum - mmu->addr[address] - 1;
     }
 
-    mmu->addr[0x014D] = checksum;
+    mmu->addr[0x014D] = 231;
     // TODO: 014E-014F — Global checksum
 
     fclose(file);

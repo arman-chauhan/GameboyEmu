@@ -11,11 +11,11 @@
 #define JOYPAD_ISR 0x60
 
 typedef enum {
-    VBLANK_INTERRUPT,
-    LCD_INTERRUPT,
-    TIMER_INTERRUPT,
-    IO_INTERRUPT,
-    JOYPAD_INTERRUPT,
+    INTERRUPT_VBLANK,
+    INTERRUPT_STAT,
+    INTERRUPT_TIMER,
+    INTERRUPT_IO,
+    INTERRUPT_JOYPAD,
 } Interrupt;
 
 void handle_interrupts(cpu_t* cpu, mmu_t* mmu);

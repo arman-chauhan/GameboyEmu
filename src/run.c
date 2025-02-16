@@ -7,7 +7,10 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+
     GameBoyState *state = emu_create();
+    // GameBoyState state;
+    // emu_init(&state);
     emu_run(state, argv[1]);
     return 1;
 }

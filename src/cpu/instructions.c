@@ -22,7 +22,7 @@ void set_flag(uint8_t* flag_reg, const uint8_t flag) {
 
 void clear_flag(uint8_t* flag_reg, const uint8_t flag) {
     assert(flag >= 4 && flag <= 7 && "Unkown flag in flag register F");
-    clear_bit(flag_reg, flag);
+    CLEAR_BIT(flag_reg, flag);
 }
 
 void modify_flag(uint8_t* flag_reg, const uint8_t flag, const uint8_t set) {

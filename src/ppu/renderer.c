@@ -6,6 +6,7 @@
 #include "dma.h"
 
 #define SCALE 4
+#define PADDING 2  // Space around each tile
 
 #define TILE_LEN   8
 #define ROW_COUNT  144
@@ -14,17 +15,30 @@
 
 void renderer_init() {
     InitWindow(COL_COUNT * SCALE, ROW_COUNT * SCALE, "Gameboy"); // Gameboy window
-    // InitWindow(16 * 8 * SCALE, 24 * 8 * SCALE, "Gameboy-debug"); // Debug window
+    // InitWindow(16 * (8  * SCALE + PADDING)  , 24 * (8  * SCALE + PADDING), "Gameboy-debug"); // Debug window
     SetTargetFPS(60);
 }
 
-// const Color colors[] = {WHITE, SKYBLUE, ORANGE, BLACK};
 const Color colors[] = {
-    {224, 248, 208, 255},
-    {136, 192, 112, 255},
-    {52, 104, 86, 255},
-    {8, 24, 32, 255},
+    {255, 255, 255, 255},  // White (0xFFFFFFFF)
+    {170, 170, 170, 255},  // Light gray (0xFFAAAAAA)
+    {85,  85,  85,  255},  // Dark gray (0xFF555555)
+    {0,   0,   0,   255}   // Black (0xFF000000)
 };
+
+// const Color colors[] = {
+//     {224, 248, 208, 255},
+//     {136, 192, 112, 255},
+//     {52, 104, 86, 255},
+//     {8, 24, 32, 255},
+// };
+//
+// const Color colors[] = {
+//     RAYWHITE,
+//     LIGHTGRAY,
+//     DARKGRAY,
+//     BLACK,
+// };
 
 void RenderFrame(GameBoyState* state, u8 frameBuffer[]) {
     BeginDrawing();
@@ -38,9 +52,6 @@ void RenderFrame(GameBoyState* state, u8 frameBuffer[]) {
         }
     }
     EndDrawing();
-
-    if (WindowShouldClose())
-        state->terminate = 1;
 }
 
 uint16_t addr = 0x8000;
@@ -58,25 +69,29 @@ void get_tiles(uint16_t tiles[384][8]) {
     }
 }
 
+
 void draw_vram_tiles(uint16_t tiles[384][8]) {
     for (int i = 0; i < 384; i++) {
-        const uint16_t screenX = (i % 16) * 8 * SCALE;
-        const uint16_t screenY = (i / 16) * 8 * SCALE;
+        // Calculate position with padding to separate tiles
+        const uint16_t screenX = (i % 16) * ((8 * SCALE + PADDING));
+        const uint16_t screenY = (i / 16) * ((8 * SCALE + PADDING));
 
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
-                const uint8_t colorIndex = (tiles[i][y] >> x * 2) & 0b11;
-                DrawRectangle(screenX + x * SCALE, screenY + y * SCALE, SCALE, SCALE,
-                              colors[colorIndex]);
+                const uint8_t colorIndex = (tiles[i][y] >> (x * 2)) & 0b11;
+
+                // Draw the tile pixels with space for padding
+                DrawRectangle(screenX + x * SCALE, screenY + y * SCALE, SCALE, SCALE, colors[colorIndex]);
             }
         }
     }
 }
 
+
 void renderVRAM(GameBoyState* state) {
     uint16_t tiles[384][8] = {0};
     BeginDrawing();
-    ClearBackground(RED);
+    ClearBackground(BLACK);
     get_tiles(tiles);
     draw_vram_tiles(tiles);
     EndDrawing();
@@ -84,7 +99,6 @@ void renderVRAM(GameBoyState* state) {
     if (WindowShouldClose())
         state->terminate = 1;
 }
-
 
 // Render int the console
 typedef struct {

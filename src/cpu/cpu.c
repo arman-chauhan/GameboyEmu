@@ -1,12 +1,12 @@
 #include "cpu.h"
+#include "debug.h"
 #include "instructions.h"
 #include "mmu.h"
 #include "utils.h"
-#include "debug.h"
 #include <stdlib.h>
 
 cpu_t* cpu_create(void) {
-    cpu_t* cpu = malloc(sizeof(cpu));
+    cpu_t* cpu = malloc(sizeof(cpu_t));
     if (cpu == NULL) {
         Log("Failed to allocate the cpu!");
         exit(EXIT_FAILURE);
@@ -24,7 +24,7 @@ void cpu_init(cpu_t* cpu) {
     cpu->regs.H = 0x01;
     cpu->regs.L = 0x4D;
     cpu->regs.SP = 0xFFFE;
-    cpu->regs.PC = 0; // 0x100;
+    cpu->regs.PC = 0x100;
     cpu->halt = 0;
     cpu->stop = 0;
     cpu->IME = 0;
@@ -51,6 +51,7 @@ uint8_t cpu_step(cpu_t* cpu, mmu_t* mmu) {
     }
 
     const uint8_t opcode = cpu_fetch(cpu);
+
     instruction_t instr = instruction_table[opcode];
     if (opcode == 0xCB) { instr = instruction_prefixed_table[mmu_readU8(cpu->regs.PC + 1)]; }
 

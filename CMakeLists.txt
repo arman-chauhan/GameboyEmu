@@ -17,7 +17,8 @@ add_executable(GameBoy ${SOURCES} ${HEADERS} lib/libraylib.a
         src/ppu/ppu.c
         src/ppu/fetcher.h
         src/ppu/fifo.h
-        src/ppu/raylib.h)
+        src/ppu/raylib.h
+)
 
 target_include_directories(
         GameBoy PRIVATE

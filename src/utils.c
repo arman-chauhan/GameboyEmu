@@ -9,6 +9,8 @@ void Log(char* fmt, ...) {
     vprintf(fmt, args);
     printf("\n");
     va_end(args);
+
+    fflush(stdout);
 }
 
 

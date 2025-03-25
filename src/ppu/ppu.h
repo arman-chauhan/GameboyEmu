@@ -23,11 +23,33 @@ enum FetcherState {
     ReadTileData0,
     ReadTileData1,
     PushToFIFO,
+    ReadSpriteID,
+    ReadSpriteFlag,
+    ReadSpriteData0,
+    ReadSpriteData1,
+    PushSpriteFIFO,
 };
+
+
+
+typedef struct {
+    u8 y;
+    u8 x;
+    u8 tile_index;
+    u8 flags;
+
+    bool fetched;
+}sprite_t;
+
+typedef struct {
+    sprite_t sprites[10];
+    u8 count;
+}sprite_buffer_t;
 
 typedef struct {
     enum FetcherState state;
-    fifo_t fifo;
+    fifo_t bg_fifo;
+    fifo_t sprite_fifo;
     u8 ticks;
 
     u16 mapAddr;
@@ -38,17 +60,26 @@ typedef struct {
     u8 tileID;
     u8 tileLineLow;
     u8 tileLineHigh;
+    u8 tileData;
+
+    u8 spriteLineLow;
+    u8 spriteLineHigh;
+    u8 spriteData;
+
+    sprite_t *spriteToFetch;
+    enum FetcherState paused_state;
 
     bool fetching_window;
     bool had_window_pixel;
     u8 window_line_counter;
+    bool bg_win_disable;
 } fetcher_t;
 
 enum PPUState {
-    HBLANK,
-    VBLANK,
-    OAM_SCAN,
-    PIXEL_TRANSFER,
+    PPU_MODE_HBLANK,
+    PPU_MODE_VBLANK,
+    PPU_MODE_OAM_SCAN,
+    PPU_MODE_PIXEL_TRANSFER,
 };
 
 typedef struct pixel_processing_unit_t {
@@ -65,8 +96,12 @@ typedef struct pixel_processing_unit_t {
     uint8_t* wy;   // FF4A
     uint8_t* wx;   // FF4B
 
-    uint8_t* vram;
-    uint8_t* oam;
+
+    uint8_t* vram; // Reference to oam in mmu.
+    uint8_t* oam; // Reference to oam in mmu.
+
+    sprite_buffer_t sprite_buffer; // Buffer to store up to 10 sprites.
+    u8 oam_scan_index; // Keeps track of which sprite to check in oam scan.
 
     uint16_t ticks;
     enum PPUState state;
@@ -74,14 +109,11 @@ typedef struct pixel_processing_unit_t {
     uint8_t x_pos;
     uint8_t pixel_data[160 * 144];
 
-    bool in_Window;
     bool window_enabled;
     bool stat_interrupt;
     u8 stat_if;
     u8 stat_ie;
     u8 old_mask;
-
-
 } ppu_t;
 
 void ppu_tick(ppu_t* ppu);

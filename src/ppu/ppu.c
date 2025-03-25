@@ -1,8 +1,10 @@
+#include "ppu.h"
 #include "fetcher.h"
 #include "interrupt.h"
-#include "ppu.h"
 #include "string.h"
 #include "utils.h"
+
+#include <assert.h>
 
 typedef enum {
     STAT_SOURCE_LYC,
@@ -41,9 +43,8 @@ void ppu_init(ppu_t* ppu, mmu_t* mmu) {
     ppu->ticks = 0;
     ppu->x_pos = 0;
 
-    ppu->state = OAM_SCAN;
+    ppu->state = PPU_MODE_OAM_SCAN;
 }
-
 
 static void eval_ly_lyc(ppu_t* ppu) {
     if ((*ppu->ly) == (*ppu->lyc)) {
@@ -55,7 +56,6 @@ static void eval_ly_lyc(ppu_t* ppu) {
     }
 }
 
-
 void eval_stat(ppu_t* ppu) {
     eval_ly_lyc(ppu);
 
@@ -66,33 +66,91 @@ void eval_stat(ppu_t* ppu) {
     ppu->old_mask = mask;
 }
 
-
 static void update_ppu_state(ppu_t* ppu, enum PPUState state) {
     ppu->state = state;
     // Last two bits of lcdc denote current mode
     (*ppu->stat) = (*ppu->stat & 0b11111100) | state;
 
     ppu->stat_if &= 0b01000000;
-    if (state == OAM_SCAN) ppu->stat_if |= 0b00100000;
-    if (state == VBLANK) ppu->stat_if |= 0b00010000;
-    if (state == HBLANK) ppu->stat_if |= 0b00001000;
+    if (state == PPU_MODE_OAM_SCAN)
+        ppu->stat_if |= 0b00100000;
+    if (state == PPU_MODE_VBLANK)
+        ppu->stat_if |= 0b00010000;
+    if (state == PPU_MODE_HBLANK)
+        ppu->stat_if |= 0b00001000;
 
     eval_stat(ppu);
 }
 
+/* Only return true if, fetcher is not already fetching the window. */
+static bool should_start_window(ppu_t* ppu) {
+    bool new_window_enable = false;
+    if (GET_BIT(*ppu->lcdc, 5) && (ppu->x_pos + 7 >= *ppu->wx) && ((*ppu->ly) >= (*ppu->wy))) {
+        new_window_enable = true;
+        ppu->fetcher.had_window_pixel = true;
+    }
+
+    if (new_window_enable && !ppu->window_enabled) {
+        ppu->window_enabled = true;
+        return true;
+    }
+
+    if (!new_window_enable && ppu->window_enabled) {
+        ppu->window_enabled = false;
+    }
+
+    return false;
+}
 
 static void increment_ly(ppu_t* ppu) {
     (*ppu->ly)++;
     eval_stat(ppu);
 }
 
+// Reads the specified sprite from the oam and returns struct sprite_t for it.
+sprite_t read_sprite(ppu_t* ppu, u8 sprite_index) {
+    sprite_t s = {.fetched = false};
+    memcpy(&s, &ppu->oam[sprite_index * 4], 4);
+    return s;
+}
+
+// Checks if a sprite is eligible to be put in the buffer.
+bool check_sprite(sprite_t* sprite, u8 sprite_height, u8 ly) {
+    if (sprite->x > 0 && (sprite->y <= ly + 16) && (ly + 16 < sprite->y + sprite_height)) {
+        return true;
+    }
+
+    return false;
+}
+
+// Loads a new sprite to buffer, pointer by the oam_scan_index, if it is eligible.
+void load_new_sprite(ppu_t* ppu) {
+    if (ppu->sprite_buffer.count == 10) {
+        return;
+    }
+
+    sprite_t new_sprite = read_sprite(ppu, ppu->oam_scan_index);
+    u8 sprite_height = GET_BIT(*ppu->lcdc, 2) == 0 ? 8 : 16;
+    if (check_sprite(&new_sprite, sprite_height, *ppu->ly)) {
+        ppu->sprite_buffer.sprites[ppu->sprite_buffer.count] = new_sprite;
+        ppu->sprite_buffer.count++;
+    }
+
+    ppu->oam_scan_index++;
+}
 
 void ppu_tick(ppu_t* ppu) {
     ppu->ticks++;
 
     switch (ppu->state)
-    case OAM_SCAN: {
-        if (ppu->ticks >= 80) {
+    case PPU_MODE_OAM_SCAN: {
+        // Takes 2 cycles to check and load a new sprite.
+        if (ppu->ticks % 2 == 0) {
+            load_new_sprite(ppu);
+        }
+
+        // Initialize fetcher for background and change mode ot PIXEL TRANSFER
+        if (ppu->ticks == 80) {
             ppu->x_pos = 0;
 
             u16 bg_base = GET_BIT(*ppu->lcdc, 3) ? 0x9C00 : 0x9800;
@@ -103,37 +161,79 @@ void ppu_tick(ppu_t* ppu) {
             u16 tileData = GET_BIT(*ppu->lcdc, 4) ? 0x8000 : 0x8800;
 
             fetcher_start(&ppu->fetcher, tileMapRow, tileData, tileOffset, tileLine);
-            update_ppu_state(ppu, PIXEL_TRANSFER);
+            update_ppu_state(ppu, PPU_MODE_PIXEL_TRANSFER);
         }
         break;
-    case PIXEL_TRANSFER:
+    case PPU_MODE_PIXEL_TRANSFER: {
         fetcher_tick(ppu, &ppu->fetcher);
-        if (ppu->fetcher.fifo.size > 8) {
-            u8 f = fifo_pop(&ppu->fetcher.fifo);
-            f = (*ppu->bgp >> f * 2) & 0x3; // Pick color from palette
-            ppu->pixel_data[*ppu->ly * 160 + ppu->x_pos] = f;
+
+        // Reinitialize the fetcher for a window fetch.
+        if (should_start_window(ppu)) {
+            u16 bg_base = GET_BIT(*ppu->lcdc, 6) ? 0x9C00 : 0x9800;
+            u8 y = ppu->fetcher.window_line_counter;
+            u8 tileLine = y % 8;
+            u8 tileOffset = (ppu->x_pos - *ppu->wx + 7) / 8;
+            u16 tileMapRow = bg_base + (y / 8) * 32;
+            u16 tileData = GET_BIT(*ppu->lcdc, 4) ? 0x8000 : 0x8800;
+
+            fifo_clear(&ppu->fetcher.bg_fifo);
+            fetcher_start(&ppu->fetcher, tileMapRow, tileData, tileOffset, tileLine);
+        }
+
+        // if (GET_BIT(*ppu->lcdc, 1)) {
+        //     if (ppu->fetcher.state == ReadSpriteData0 || ppu->fetcher.state == ReadSpriteData1 ||
+        //         ppu->fetcher.state == ReadSpriteID)
+        //         return;
+        //
+        //     for (int sprite_index = 0; sprite_index < ppu->sprite_buffer.count; sprite_index++) {
+        //         if (ppu->sprite_buffer.sprites[sprite_index].x == ppu->x_pos + 8) {
+        //             fetcher_start_sprite_fetch(ppu, sprite_index);
+        //             return;
+        //         }
+        //     }
+        // }
+
+
+        if (ppu->fetcher.bg_fifo.size > 0) {
+            u8 bg_pixel = fifo_pop(&ppu->fetcher.bg_fifo);
+            bg_pixel = (*ppu->bgp >> bg_pixel * 2) & 0x3; // Pick color from palette
+            if (ppu->fetcher.sprite_fifo.size > 0) ppu->fetcher.sprite_fifo.size--;
+
+            ppu->pixel_data[*ppu->ly * 160 + ppu->x_pos] = bg_pixel;
+
+            if (GET_BIT(*ppu->lcdc, 0) == 0) {
+                ppu->pixel_data[*ppu->ly * 160 + ppu->x_pos] = 0;
+            }
+
             ppu->x_pos++;
         }
+
         if (ppu->x_pos >= 160) {
-            fifo_clear(&ppu->fetcher.fifo);
-            update_ppu_state(ppu, HBLANK);
+            ppu->sprite_buffer.count = 0;
+            assert(ppu->ticks <= 456 && "cycle overflowed");
+            fifo_clear(&ppu->fetcher.bg_fifo);
+            fifo_clear(&ppu->fetcher.sprite_fifo);
+            update_ppu_state(ppu, PPU_MODE_HBLANK);
         }
-        break;
-    case HBLANK: {
+    } break;
+    case PPU_MODE_HBLANK: {
         if (ppu->ticks >= 456) {
-            increment_ly(ppu);
             ppu->ticks = 0;
-            ppu->fetcher.window_line_counter += ppu->fetcher.had_window_pixel;
+            increment_ly(ppu);
+
+            if (ppu->fetcher.had_window_pixel) ppu->fetcher.window_line_counter++;
+            ppu->fetcher.had_window_pixel = false;
 
             if (*ppu->ly >= 144) {
-                update_ppu_state(ppu, VBLANK);
+                update_ppu_state(ppu, PPU_MODE_VBLANK);
                 RaiseInterrupt(INTERRUPT_VBLANK);
             } else {
-                update_ppu_state(ppu, OAM_SCAN);
+                ppu->oam_scan_index = 0;
+                update_ppu_state(ppu, PPU_MODE_OAM_SCAN);
             }
         }
     } break;
-    case VBLANK: {
+    case PPU_MODE_VBLANK: {
         if (ppu->ticks != 456) {
             return;
         }
@@ -143,7 +243,8 @@ void ppu_tick(ppu_t* ppu) {
 
         if (*ppu->ly >= 153) {
             (*ppu->ly) = 0;
-            update_ppu_state(ppu, OAM_SCAN);
+            ppu->fetcher.window_line_counter = 0;
+            update_ppu_state(ppu, PPU_MODE_OAM_SCAN);
         }
     } break;
     default:

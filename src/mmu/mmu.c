@@ -54,11 +54,13 @@ uint8_t mmu_readU8(uint16_t addr) {
         return readWRAM(addr - 0x2000);
     } else if (addr >= 0xFE00 && addr <= 0xFE9F) {
         // OAM: 0xFE00-0xFE9F
+        if (dma_is_active()) {
+            return 0xff;
+        }
         return readOAM(addr);
-    } // else if(addr >= 0xFE0A) {
-    //     Log("Questionable memory access!!!");
-    //     return ctx.addr[addr];
-    // }
+    }
+    // } else if (addr >= 0xFE0A) {
+    //     return mmu.addr[addr];}
     else if (addr >= 0xFF00 && addr <= 0xFF7F) {
         // I/O Ports: 0xFF00-0xFF7F
         return readIOPorts(addr);
@@ -74,8 +76,6 @@ uint8_t mmu_readU8(uint16_t addr) {
     }
 }
 
-uint8_t ly = 0;
-// todo: hardcoded ly at ff44
 uint8_t MMU_ReadIO(const uint8_t addr) {
     if (addr < 0x00 || addr > 0xff) {
         Log("Error: address not in range");
@@ -111,20 +111,24 @@ void MMU_WriteIO(const uint8_t addr, const uint8_t value) {
         return;
     }
 
-    if (addr + 0xFF00 == 0xFF46) {
+    if (addr + 0xFF00 == 0xFF46   && !dma_is_active()) {
         dma_start(value);
     }
     mmu.io_regs[addr] = value;
 }
 
 void MMU_WriteU8(const uint16_t addr, const uint8_t value) {
+    if (addr <= 0x7fff) {
+        return;
+    }
+
     if (addr == 0xFF44) {
         Log("Writes to LY register are ignored.");
         return;
     }
     if (addr == 0xFF41) {
-        mmu.gb->ppu->stat_ie = 0xff;
-        eval_stat(mmu.gb->ppu);
+        // mmu.gb->ppu->stat_ie = 0xff;
+        // eval_stat(mmu.gb->ppu);
 
         mmu.gb->ppu->stat_ie = value & 0b01111000;
         eval_stat(mmu.gb->ppu);
@@ -133,10 +137,76 @@ void MMU_WriteU8(const uint16_t addr, const uint8_t value) {
         eval_stat(mmu.gb->ppu);
     }
 
+    if (addr >= 0xFE00 && addr <= 0xFE9F) {
+        if (dma_is_active()) {
+            return;
+        }
+    }
+
+    if (addr == 0xFF46) {
+        dma_start(value);
+    }
+
     mmu.addr[addr] = value;
+}
+
+void MMUd_WriteU8(u16 addr, u8 value) {
+    if (addr <= 0x7FFF) {
+        // ROM: 0x0000-0x7FFF
+        return;
+    } else if (addr >= 0x8000 && addr <= 0x9FFF) {
+        // VRAM: 0x8000-0x9FFF
+        mmu.vram[0x8000 - addr] = value;
+    } else if (addr >= 0xA000 && addr <= 0xBFFF) {
+        // External RAM: 0xA000-0xBFFF
+        mmu.sram[0xA000 - addr] = value;
+    } else if (addr >= 0xC000 && addr <= 0xDFFF) {
+        // WRAM: 0xC000-0xDFFF
+        mmu.wram[0xc000 - addr] = value;
+    } else if (addr >= 0xE000 && addr <= 0xFDFF) {
+        // WRAM Echo: 0xE000-0xFDFF (mirrors 0xC000-0xDFFF)
+        mmu.wram[0xe000 - addr] = value;
+    } else if (addr >= 0xFE00 && addr <= 0xFE9F) {
+        // OAM: 0xFE00-0xFE9F
+        if (dma_is_active()) {
+            return;
+        }
+        mmu.oam[0xfe00 - addr] = value;
+    } else if (addr >= 0xFE0A) {
+        mmu.addr[addr] = value;
+    } else if (addr >= 0xFF00 && addr <= 0xFF7F) {
+        // I/O Ports: 0xFF00-0xFF7F
+        if (addr == 0xff44) {
+            printf("Writes to LY register are ignored.");
+            return;
+        }
+
+        if (addr == 0xFF04) {
+            mmu.io_regs[addr] = 0;
+            timer_t* timer = GetTimer();
+            timer->divider_counter = 0;
+            return;
+        }
+
+        if (addr == 0xFF46) {
+            dma_start(value);
+        }
+        mmu.io_regs[0xff00 - addr] = value;
+    } else if (addr >= 0xFF80 && addr <= 0xFFFE) {
+        // HRAM: 0xFF80-0xFFFE
+        mmu.hram[0xff80 - addr] = value;
+    } else if (addr == 0xFFFF) {
+        // Interrupt Enable Register: 0xFFFF
+        mmu.ie_reg = value;
+    } else {
+        Log("Invalid memory read at address: 0x%04X\n", addr);
+        exit(EXIT_FAILURE);
+    }
 }
 
 void MMU_WriteU16(const uint16_t addr, const uint16_t value) {
     MMU_WriteU8(addr, (uint8_t)value & 0xff);
     MMU_WriteU8(addr + 1, (uint8_t)(value >> 8));
 }
+
+mmu_t* get_mmu_ctx() { return &mmu; }

@@ -198,9 +198,7 @@ void ppu_tick(ppu_t* ppu) {
             for (int sprite_index = 0; sprite_index < ppu->sprite_buffer.count; sprite_index++) {
                 if (ppu->sprite_buffer.sprites[sprite_index].fetched)
                     continue;
-                // Log("%i  %i",ppu->sprite_buffer.sprites[sprite_index].x, ppu->x_pos + 8  );
                 if (ppu->sprite_buffer.sprites[sprite_index].x <= ppu->x_pos + 8) {
-                    Log("in mixer");
                     fetcher_start_sprite_fetch(ppu, sprite_index);
                     ppu->sprite_buffer.sprites[sprite_index].fetched = true;
                     return;
@@ -213,7 +211,6 @@ void ppu_tick(ppu_t* ppu) {
 
             if (GET_BIT(*ppu->lcdc, 0) == 0) pixel.value = 0;
             if (ppu->fetcher.sprite_fifo.size > 0) {
-                Log("in mixer");
                 pixel_t sp_pixel = fifo_pop(&ppu->fetcher.sprite_fifo);
                 pixel = mix_pixels(ppu, pixel, sp_pixel);
             }

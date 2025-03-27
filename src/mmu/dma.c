@@ -24,9 +24,10 @@ void dma_start(uint8_t addr) {
     uint16_t oam_addr = 0xFE00;
 
     for (int i = 0; i < 160; i++) {
-        uint8_t data = mmu_readU8(start + i);
-        MMU_WriteU8(oam_addr+i, data);
+        uint8_t data = get_mmu_ctx()->addr[start + i];
+        get_mmu_ctx()->addr[oam_addr + i] = data;
     }
+    ctx.active = false;
 }
 
 void dma_tick(uint8_t cycles) {
@@ -35,17 +36,16 @@ void dma_tick(uint8_t cycles) {
             return;
         }
 
-        if(ctx.start_delay) {
+        if (ctx.start_delay) {
             ctx.start_delay--;
             return;
         }
 
-        const uint8_t data = mmu_readU8((ctx.start * 0x100) + ctx.byte);
-        MMU_WriteU8(0xFE00 + ctx.byte, data);
+        const uint8_t data = get_mmu_ctx()->addr[(ctx.start << 8) + ctx.byte];
+        get_mmu_ctx()->addr[0xFE00 + ctx.byte] = data;
 
         ctx.byte++;
         ctx.active = ctx.byte < 0xA0;
-
     }
 }
 

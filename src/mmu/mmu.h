@@ -47,5 +47,8 @@ void MMU_WriteIO(uint8_t addr, uint8_t value);
 void MMU_WriteU8(uint16_t addr, uint8_t value);
 void MMU_WriteU16(uint16_t addr, uint16_t value);
 
+
+mmu_t* get_mmu_ctx();
+
 mmu_t *mmu_create(void);
 #endif

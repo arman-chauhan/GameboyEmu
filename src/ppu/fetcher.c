@@ -14,13 +14,13 @@ void fetcher_start(fetcher_t* fetcher) {
     fetcher->tileLineHigh = 0;
 }
 
-u16 read_tile_addr(ppu_t *ppu, fetcher_t* f) {
+u16 read_tile_addr(ppu_t* ppu, fetcher_t* f) {
     u16 tileData = GET_BIT(*ppu->lcdc, 4) ? 0x8000 : 0x8800;
     u8 tileLine;
     if (ppu->window_enabled) {
         u8 y = ppu->fetcher.window_line_counter;
         tileLine = y % 8;
-    }else {
+    } else {
         u8 y = (*ppu->ly + *ppu->scy) & 0xff;
         tileLine = y % 8;
     }
@@ -38,7 +38,7 @@ u16 read_tile_addr(ppu_t *ppu, fetcher_t* f) {
     return tile_addr;
 }
 
-static u16 get_tile_map(ppu_t *ppu, fetcher_t *fetcher) {
+static u16 get_tile_map(ppu_t* ppu, fetcher_t* fetcher) {
     if (ppu->window_enabled) {
         const u16 bg_base = GET_BIT(*ppu->lcdc, 6) ? 0x9C00 : 0x9800;
         const u8 y = ppu->fetcher.window_line_counter;
@@ -72,7 +72,7 @@ bool try_push(fetcher_t* fetcher, fifo_t* f) {
         }
 
         for (int i = 0; i < 8; i++) {
-            fifo_push(f, tile_row[i]);
+            fifo_push(f, tile_row[i], 0, 0);
         }
         return true;
     }
@@ -105,47 +105,62 @@ void fetcher_tick(ppu_t* ppu, fetcher_t* fetcher) {
     } break;
 
     case ReadSpriteID: {
-        /*
-         * Already fetched during oam scan, in ppu read_sprite(),
-         * Kept this state here just to make it like the docs said and to consume the cycles.
-         */
-        fetcher->state = PushSpriteFIFO;
+        // Already fetched tile_index during oam scan, in ppu read_sprite(),
+        if (GET_BIT(*ppu->lcdc, 2)) {
+            fetcher->spriteToFetch->tile_index &= 0xFE;
+        }
+        fetcher->state = ReadSpriteData0;
 
     } break;
     case ReadSpriteData0: {
-        // u8 sprite_id = fetcher->spriteToFetch->tile_index;
-        // u8 sprite_line = (*ppu->ly) - 16 + fetcher->spriteToFetch->y;
-        // u16 tile_addr = 0x8000 + (sprite_id * 16) + (sprite_line * 2);
-        //
-        // fetcher->spriteLineLow = mmu_readU8(tile_addr);
+        u8 sprite_id = fetcher->spriteToFetch->tile_index;
+        u8 sprite_line = (*ppu->ly) - (fetcher->spriteToFetch->y - 16);
+        if (GET_BIT(fetcher->spriteToFetch->flags, 6)) {
+            sprite_line = GET_BIT(*ppu->lcdc, 2) ? 15 - sprite_line : 7 - sprite_line;
+        }
+
+        u16 tile_addr = 0x8000 + (sprite_id * 16) + (sprite_line * 2);
+        fetcher->spriteLineLow = mmu_readU8(tile_addr);
         fetcher->state = ReadSpriteData1;
     } break;
     case ReadSpriteData1: {
-        // u8 sprite_id = fetcher->spriteToFetch->tile_index;
-        // u8 sprite_line = (*ppu->ly) - 16 + fetcher->spriteToFetch->y;
-        // u16 tile_addr = 0x8000 + (sprite_id * 16) + (sprite_line * 2);
-        //
-        // fetcher->spriteLineHigh = mmu_readU8(tile_addr + 1);
+        u8 sprite_id = fetcher->spriteToFetch->tile_index;
+        u8 sprite_line = (*ppu->ly) - (fetcher->spriteToFetch->y - 16);
+        if (GET_BIT(fetcher->spriteToFetch->flags, 6)) {
+            sprite_line = GET_BIT(*ppu->lcdc, 2) ? 15 - sprite_line : 7 - sprite_line;
+        }
+
+        u16 tile_addr = 0x8000 + (sprite_id * 16) + (sprite_line * 2);
+        fetcher->spriteLineHigh = mmu_readU8(tile_addr + 1);
         fetcher->state = PushSpriteFIFO;
-    } break;
+    }
     case PushSpriteFIFO: {
-        // if (fetcher->sprite_fifo.size == 0) {
-        //     uint8_t hi = fetcher->spriteLineHigh;
-        //     u8 lo = fetcher->spriteLineLow;
-        //
-        //     u8 tile_row[8];
-        //     for (u8 i = 0; i < 8; i++) {
-        //         u8 p = GET_BIT(hi, (7 - i)) << 1 | GET_BIT(lo, (7 - i));
-        //         tile_row[i] = p;
-        //     }
-        //
-        //     for (int i = 0; i < 8; i++) {
-        //         fifo_push(&fetcher->sprite_fifo, tile_row[i]);
-        //     }
-        //
-        // }
+        uint8_t hi = fetcher->spriteLineHigh;
+        u8 lo = fetcher->spriteLineLow;
+        u8 tile_row[8];
+
+        u8 palette = GET_BIT(fetcher->spriteToFetch->flags, 4);
+        u8 objtobg = GET_BIT(fetcher->spriteToFetch->flags, 7);
+
+        if (GET_BIT(fetcher->spriteToFetch->flags, 5)) {
+            for (u8 i = 0; i < 8; i++) {
+                u8 p = GET_BIT(hi, i) << 1 | GET_BIT(lo, i);
+                tile_row[i] = p;
+            }
+        } else {
+            for (u8 i = 0; i < 8; i++) {
+                u8 p = GET_BIT(hi, (7 - i)) << 1 | GET_BIT(lo, (7 - i));
+                tile_row[i] = p;
+            }
+        }
+
+        for (int i = fetcher->sprite_fifo.size; i < 8; i++) {
+            fifo_push(&fetcher->sprite_fifo, tile_row[i], palette, objtobg);
+        }
+
+        fetcher->spriteToFetch = NULL;
         fetcher->state = fetcher->paused_state;
-    }break;
+    } break;
     case PushToFIFO:
         if (fetcher->bg_fifo.size == 0) {
             uint8_t hi = fetcher->tileLineHigh;
@@ -158,7 +173,7 @@ void fetcher_tick(ppu_t* ppu, fetcher_t* fetcher) {
             }
 
             for (int i = 0; i < 8; i++) {
-                fifo_push(&fetcher->bg_fifo, tile_row[i]);
+                fifo_push(&fetcher->bg_fifo, tile_row[i], 2, 0);
             }
 
             fetcher->state = ReadTileID;

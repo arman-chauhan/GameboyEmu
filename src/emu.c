@@ -23,7 +23,7 @@ void emu_runFrame(GameBoyState* state) {
             ppu_tick(state->ppu);
         }
         timer_tick(cycles);
-        dma_tick(cycles / 4);
+        // dma_tick(cycles / 4);
         cyclesThisFrame += cycles;
     }
 }

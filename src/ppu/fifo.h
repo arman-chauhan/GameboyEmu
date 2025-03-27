@@ -6,6 +6,8 @@
 typedef struct pixel_t {
     struct pixel_t* next;
     u8 value;
+    u8 palatte;
+    u8 bgOsp;
 } pixel_t;
 
 typedef struct fifo_t {
@@ -14,8 +16,8 @@ typedef struct fifo_t {
     u8 size;
 } fifo_t;
 
-void fifo_push(fifo_t* fifo, u8 value);
-u8 fifo_pop(fifo_t* fifo);
+void fifo_push(fifo_t* fifo, u8 value, u8 palatte, u8 bgOsp);
+pixel_t fifo_pop(fifo_t* fifo);
 void fifo_clear(fifo_t* fifo);
 
 #endif

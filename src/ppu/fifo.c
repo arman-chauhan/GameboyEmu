@@ -3,7 +3,7 @@
 #include <utils.h>
 
 
-void fifo_push(fifo_t *fifo, u8 value) {
+void fifo_push(fifo_t *fifo, u8 value, u8 palatte, u8 bgOsp) {
     pixel_t *newPixel = malloc(sizeof(pixel_t));
     if (newPixel == NULL) {
         Log("Failed allocating new pixel for the fifo!");
@@ -11,6 +11,8 @@ void fifo_push(fifo_t *fifo, u8 value) {
     }
     newPixel->value = value;
     newPixel->next = NULL;
+    newPixel->palatte = palatte;
+    newPixel->bgOsp = bgOsp;
 
     if (fifo->size == 0) {
         fifo->head = newPixel;
@@ -23,14 +25,18 @@ void fifo_push(fifo_t *fifo, u8 value) {
     fifo->size++;
 }
 
-u8 fifo_pop(fifo_t *fifo) {
+pixel_t fifo_pop(fifo_t *fifo) {
     if (fifo->size == 0) {
         Log("Can't pop from a empty queue!");
         exit(EXIT_FAILURE);
     }
 
     pixel_t *popped = fifo->head;
-    u8 value = popped->value;
+    pixel_t pixel = {
+        .value = popped->value,
+        .palatte = popped->palatte,
+        .bgOsp = popped->bgOsp,
+    };
     fifo->head = fifo->head->next;
 
     if (fifo->head == NULL) {
@@ -39,7 +45,7 @@ u8 fifo_pop(fifo_t *fifo) {
 
     free(popped);
     fifo->size--;
-    return value;
+    return pixel;
 }
 
 void fifo_clear(fifo_t *fifo) {

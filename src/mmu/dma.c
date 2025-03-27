@@ -1,5 +1,6 @@
 #include <dma.h>
 #include <mmu.h>
+#include <string.h>
 #include <unistd.h>
 #include <utils.h>
 typedef struct {
@@ -18,6 +19,14 @@ void dma_start(uint8_t addr) {
     ctx.byte = 0;
     ctx.active = true;
     ctx.start_delay = 2;
+
+    uint16_t start = addr * 0x100;
+    uint16_t oam_addr = 0xFE00;
+
+    for (int i = 0; i < 160; i++) {
+        uint8_t data = mmu_readU8(start + i);
+        MMU_WriteU8(oam_addr+i, data);
+    }
 }
 
 void dma_tick(uint8_t cycles) {

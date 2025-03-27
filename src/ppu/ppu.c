@@ -4,8 +4,8 @@
 #include "string.h"
 #include "utils.h"
 
+#include "renderer.h"
 #include <assert.h>
-
 typedef enum {
     STAT_SOURCE_LYC,
     STAT_SOURCE_OAM_SCAN,
@@ -42,7 +42,7 @@ void ppu_init(ppu_t* ppu, mmu_t* mmu) {
     ppu->window_enabled = false;
     ppu->ticks = 0;
     ppu->x_pos = 0;
-
+    ppu->fetcher.spriteToFetch = NULL;
     ppu->state = PPU_MODE_OAM_SCAN;
 }
 
@@ -109,8 +109,10 @@ static void increment_ly(ppu_t* ppu) {
 
 // Reads the specified sprite from the oam and returns struct sprite_t for it.
 sprite_t read_sprite(ppu_t* ppu, u8 sprite_index) {
-    sprite_t s = {.fetched = false};
-    memcpy(&s, &ppu->oam[sprite_index * 4], 4);
+    sprite_t s = {.y = ppu->oam[sprite_index * 4],
+                  .x = ppu->oam[sprite_index * 4 + 1],
+                  .tile_index = ppu->oam[sprite_index * 4 + 2],
+                  .flags = ppu->oam[sprite_index * 4 + 3]};
     return s;
 }
 
@@ -140,8 +142,29 @@ void load_new_sprite(ppu_t* ppu) {
     ppu->oam_scan_index++;
 }
 
-u8 mix_pixels(ppu_t *ppu, u8 bg_pixel, u8 sp_pixel) {
-   return sp_pixel;
+u8 apply_palette(ppu_t* ppu, u8 value, u8 palette) {
+    switch (palette) {
+    case 0:
+        value = (*ppu->obp0 >> (value * 2)) & 0x3;
+        break;
+    case 1:
+        value = (*ppu->obp1 >> (value * 2)) & 0x3;
+        break;
+    case 2:
+        value = (*ppu->bgp >> (value * 2)) & 0x3;
+        break;
+    default:
+        Log("Unknown palette");
+        break;
+    }
+    return value;
+}
+
+pixel_t mix_pixels(ppu_t* ppu, pixel_t bg_pixel, pixel_t sp_pixel) {
+    if (sp_pixel.value != 0 && (!sp_pixel.bgOsp || bg_pixel.value == 0))
+        return sp_pixel;
+
+    return bg_pixel;
 }
 
 void ppu_tick(ppu_t* ppu) {
@@ -170,34 +193,33 @@ void ppu_tick(ppu_t* ppu) {
 
         fetcher_tick(ppu, &ppu->fetcher);
 
-
-        // heres the fucking problem
-        // if (GET_BIT(*ppu->lcdc, 1)) {
-        //     if (ppu->fetcher.state == ReadSpriteData0 || ppu->fetcher.state == ReadSpriteData1 ||
-        //         ppu->fetcher.state == ReadSpriteID)
-        //         return;
-        //
-        //     for (int sprite_index = 0; sprite_index < ppu->sprite_buffer.count; sprite_index++) {
-        //         if (ppu->sprite_buffer.sprites[sprite_index].fetched)
-        //             continue;
-        //
-        //         if (ppu->sprite_buffer.sprites[sprite_index].x <= ppu->x_pos + 8) {
-        //             fetcher_start_sprite_fetch(ppu, sprite_index);
-        //             ppu->sprite_buffer.sprites[sprite_index].fetched = true;
-        //             return;
-        //         }
-        //     }
-        // }
-
-
-        if (ppu->fetcher.bg_fifo.size > 0) {
-            u8 pixel = fifo_pop(&ppu->fetcher.bg_fifo);
-            pixel = (*ppu->bgp >> pixel * 2) & 0x3; // Pick color from palette
-            ppu->pixel_data[*ppu->ly * 160 + ppu->x_pos] = pixel;
-
-            if (GET_BIT(*ppu->lcdc, 0) == 0) {
-                ppu->pixel_data[*ppu->ly * 160 + ppu->x_pos] = 0;
+        // sprites!!
+        if (GET_BIT(*ppu->lcdc, 1) && !ppu->fetcher.spriteToFetch) {
+            for (int sprite_index = 0; sprite_index < ppu->sprite_buffer.count; sprite_index++) {
+                if (ppu->sprite_buffer.sprites[sprite_index].fetched)
+                    continue;
+                // Log("%i  %i",ppu->sprite_buffer.sprites[sprite_index].x, ppu->x_pos + 8  );
+                if (ppu->sprite_buffer.sprites[sprite_index].x <= ppu->x_pos + 8) {
+                    Log("in mixer");
+                    fetcher_start_sprite_fetch(ppu, sprite_index);
+                    ppu->sprite_buffer.sprites[sprite_index].fetched = true;
+                    return;
+                }
             }
+        }
+
+        if (ppu->fetcher.bg_fifo.size > 0 && !ppu->fetcher.spriteToFetch) {
+            pixel_t pixel = fifo_pop(&ppu->fetcher.bg_fifo);
+
+            if (GET_BIT(*ppu->lcdc, 0) == 0) pixel.value = 0;
+            if (ppu->fetcher.sprite_fifo.size > 0) {
+                Log("in mixer");
+                pixel_t sp_pixel = fifo_pop(&ppu->fetcher.sprite_fifo);
+                pixel = mix_pixels(ppu, pixel, sp_pixel);
+            }
+
+            u8 color_value = apply_palette(ppu, pixel.value, pixel.palatte);
+            ppu->pixel_data[*ppu->ly * 160 + ppu->x_pos] = color_value;
 
             ppu->x_pos++;
         }

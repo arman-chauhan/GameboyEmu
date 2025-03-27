@@ -52,11 +52,7 @@ typedef struct {
     fifo_t sprite_fifo;
     u8 ticks;
 
-    u16 mapAddr;
-    u16 addrMethod;
     u16 tileIndex;
-    u8 tileOffset;
-    u8 tileLine;
     u8 tileID;
     u8 tileLineLow;
     u8 tileLineHigh;

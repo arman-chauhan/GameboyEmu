@@ -133,16 +133,21 @@ void load_new_sprite(ppu_t* ppu) {
     u8 sprite_height = GET_BIT(*ppu->lcdc, 2) == 0 ? 8 : 16;
     if (check_sprite(&new_sprite, sprite_height, *ppu->ly)) {
         ppu->sprite_buffer.sprites[ppu->sprite_buffer.count] = new_sprite;
+        ppu->sprite_buffer.sprites[ppu->sprite_buffer.count].fetched = false;
         ppu->sprite_buffer.count++;
     }
 
     ppu->oam_scan_index++;
 }
 
+u8 mix_pixels(ppu_t *ppu, u8 bg_pixel, u8 sp_pixel) {
+   return sp_pixel;
+}
+
 void ppu_tick(ppu_t* ppu) {
     ppu->ticks++;
 
-    switch (ppu->state)
+    switch (ppu->state) {
     case PPU_MODE_OAM_SCAN: {
         // Takes 2 cycles to check and load a new sprite.
         if (ppu->ticks % 2 == 0) {
@@ -152,42 +157,33 @@ void ppu_tick(ppu_t* ppu) {
         // Initialize fetcher for background and change mode ot PIXEL TRANSFER
         if (ppu->ticks == 80) {
             ppu->x_pos = 0;
-
-            u16 bg_base = GET_BIT(*ppu->lcdc, 3) ? 0x9C00 : 0x9800;
-            u8 y = (*ppu->ly + *ppu->scy) & 0xff;
-            u8 tileLine = y % 8;
-            u8 tileOffset = (*ppu->scx / 8);
-            u16 tileMapRow = bg_base + (y / 8) * 32;
-            u16 tileData = GET_BIT(*ppu->lcdc, 4) ? 0x8000 : 0x8800;
-
-            fetcher_start(&ppu->fetcher, tileMapRow, tileData, tileOffset, tileLine);
+            fetcher_start(&ppu->fetcher);
             update_ppu_state(ppu, PPU_MODE_PIXEL_TRANSFER);
         }
-        break;
+    } break;
     case PPU_MODE_PIXEL_TRANSFER: {
-        fetcher_tick(ppu, &ppu->fetcher);
-
         // Reinitialize the fetcher for a window fetch.
         if (should_start_window(ppu)) {
-            u16 bg_base = GET_BIT(*ppu->lcdc, 6) ? 0x9C00 : 0x9800;
-            u8 y = ppu->fetcher.window_line_counter;
-            u8 tileLine = y % 8;
-            u8 tileOffset = (ppu->x_pos - *ppu->wx + 7) / 8;
-            u16 tileMapRow = bg_base + (y / 8) * 32;
-            u16 tileData = GET_BIT(*ppu->lcdc, 4) ? 0x8000 : 0x8800;
-
             fifo_clear(&ppu->fetcher.bg_fifo);
-            fetcher_start(&ppu->fetcher, tileMapRow, tileData, tileOffset, tileLine);
+            fetcher_start(&ppu->fetcher);
         }
 
+        fetcher_tick(ppu, &ppu->fetcher);
+
+
+        // heres the fucking problem
         // if (GET_BIT(*ppu->lcdc, 1)) {
         //     if (ppu->fetcher.state == ReadSpriteData0 || ppu->fetcher.state == ReadSpriteData1 ||
         //         ppu->fetcher.state == ReadSpriteID)
         //         return;
         //
         //     for (int sprite_index = 0; sprite_index < ppu->sprite_buffer.count; sprite_index++) {
-        //         if (ppu->sprite_buffer.sprites[sprite_index].x == ppu->x_pos + 8) {
+        //         if (ppu->sprite_buffer.sprites[sprite_index].fetched)
+        //             continue;
+        //
+        //         if (ppu->sprite_buffer.sprites[sprite_index].x <= ppu->x_pos + 8) {
         //             fetcher_start_sprite_fetch(ppu, sprite_index);
+        //             ppu->sprite_buffer.sprites[sprite_index].fetched = true;
         //             return;
         //         }
         //     }
@@ -195,11 +191,9 @@ void ppu_tick(ppu_t* ppu) {
 
 
         if (ppu->fetcher.bg_fifo.size > 0) {
-            u8 bg_pixel = fifo_pop(&ppu->fetcher.bg_fifo);
-            bg_pixel = (*ppu->bgp >> bg_pixel * 2) & 0x3; // Pick color from palette
-            if (ppu->fetcher.sprite_fifo.size > 0) ppu->fetcher.sprite_fifo.size--;
-
-            ppu->pixel_data[*ppu->ly * 160 + ppu->x_pos] = bg_pixel;
+            u8 pixel = fifo_pop(&ppu->fetcher.bg_fifo);
+            pixel = (*ppu->bgp >> pixel * 2) & 0x3; // Pick color from palette
+            ppu->pixel_data[*ppu->ly * 160 + ppu->x_pos] = pixel;
 
             if (GET_BIT(*ppu->lcdc, 0) == 0) {
                 ppu->pixel_data[*ppu->ly * 160 + ppu->x_pos] = 0;
@@ -221,7 +215,8 @@ void ppu_tick(ppu_t* ppu) {
             ppu->ticks = 0;
             increment_ly(ppu);
 
-            if (ppu->fetcher.had_window_pixel) ppu->fetcher.window_line_counter++;
+            if (ppu->fetcher.had_window_pixel)
+                ppu->fetcher.window_line_counter++;
             ppu->fetcher.had_window_pixel = false;
 
             if (*ppu->ly >= 144) {

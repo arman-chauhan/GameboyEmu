@@ -1,3 +1,7 @@
 CompileFlags:
   Add:
-    - "-I/Users/armanchauhan/projects/Gameboy/include"
+    - "-I/Users/armanchauhan/Developer/sf/src/cpu"
+    - "-I/Users/armanchauhan/Developer/sf/src/debug"
+    - "-I/Users/armanchauhan/Developer/sf/src/mmu"
+    - "-I/Users/armanchauhan/Developer/sf/src/ppu"
+    - "-I/Users/armanchauhan/Developer/sf/src"

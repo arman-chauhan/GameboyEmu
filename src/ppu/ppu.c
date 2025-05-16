@@ -160,7 +160,7 @@ u8 apply_palette(ppu_t* ppu, u8 value, u8 palette) {
     return value;
 }
 
-pixel_t mix_pixels(ppu_t* ppu, pixel_t bg_pixel, pixel_t sp_pixel) {
+pixel_t mix_pixels( pixel_t bg_pixel, pixel_t sp_pixel) {
     if (sp_pixel.value != 0 && (!sp_pixel.bgOsp || bg_pixel.value == 0))
         return sp_pixel;
 
@@ -212,7 +212,7 @@ void ppu_tick(ppu_t* ppu) {
             if (GET_BIT(*ppu->lcdc, 0) == 0) pixel.value = 0;
             if (ppu->fetcher.sprite_fifo.size > 0) {
                 pixel_t sp_pixel = fifo_pop(&ppu->fetcher.sprite_fifo);
-                pixel = mix_pixels(ppu, pixel, sp_pixel);
+                pixel = mix_pixels(pixel, sp_pixel);
             }
 
             u8 color_value = apply_palette(ppu, pixel.value, pixel.palatte);

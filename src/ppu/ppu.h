@@ -65,10 +65,8 @@ typedef struct {
     sprite_t *spriteToFetch;
     enum FetcherState paused_state;
 
-    bool fetching_window;
     bool had_window_pixel;
     u8 window_line_counter;
-    bool bg_win_disable;
 } fetcher_t;
 
 enum PPUState {

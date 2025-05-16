@@ -17,12 +17,13 @@ int main(int argc, char *argv[]) {
      * please later refactor and make it so that mmu takes mmu pointer.
     */
     mmu_t *m = mmu_create();
-
+    joypad_t j;
 
     GameBoyState state = {
         .cpu = &c,
         .ppu = &p,
         .mmu = m,
+        .joypad = &j,
     };
 
     emu_init(&state);

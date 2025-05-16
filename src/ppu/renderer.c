@@ -41,7 +41,7 @@ const Color colors[] = {
 // };
 
 void RenderFrame(GameBoyState* state, u8 frameBuffer[]) {
-    BeginDrawing();
+
     ClearBackground(RED);
 
     for (int y = 0; y < ROW_COUNT; y++) {
@@ -51,7 +51,7 @@ void RenderFrame(GameBoyState* state, u8 frameBuffer[]) {
             DrawRectangle(x * SCALE, y * SCALE, SCALE, SCALE, raylib_color);
         }
     }
-    EndDrawing();
+
 }
 
 uint16_t addr = 0x8000;

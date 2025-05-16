@@ -1,3 +1,4 @@
+#include "joypad.h"
 #include "raylib.h"
 
 #include <cartridge.h>
@@ -13,6 +14,8 @@
 #define FPS        59.73
 #define MAX_CYCLES 70224
 
+
+
 void emu_runFrame(GameBoyState* state) {
     uint32_t cyclesThisFrame = 0;
     while (cyclesThisFrame < MAX_CYCLES) {
@@ -23,9 +26,27 @@ void emu_runFrame(GameBoyState* state) {
             ppu_tick(state->ppu);
         }
         timer_tick(cycles);
-        // dma_tick(cycles / 4);
         cyclesThisFrame += cycles;
     }
+}
+
+
+void handle_input(GameBoyState* state) {
+    u8 buttons = 0x0F;
+    u8 directions = 0x0F;
+
+    if (IsKeyDown(KEY_Z))         buttons &= ~BTN_A;
+    if (IsKeyDown(KEY_X))         buttons &= ~BTN_B;
+    if (IsKeyDown(KEY_BACKSPACE)) buttons &= ~BTN_SELECT;
+    if (IsKeyDown(KEY_ENTER))     buttons &= ~BTN_START;
+
+    if (IsKeyDown(KEY_RIGHT))     directions &= ~BTN_RIGHT;
+    if (IsKeyDown(KEY_LEFT))      directions &= ~BTN_LEFT;
+    if (IsKeyDown(KEY_UP))        directions &= ~BTN_UP;
+    if (IsKeyDown(KEY_DOWN))      directions &= ~BTN_DOWN;
+
+    state->joypad->buttons = buttons;
+    state->joypad->directions = directions;
 }
 
 void emu_run(GameBoyState* state, char* path) {
@@ -36,12 +57,13 @@ void emu_run(GameBoyState* state, char* path) {
 
     renderer_init();
     while (!state->terminate) {
-        if (WindowShouldClose()) state->terminate = true;
-        emu_runFrame(state);
 
+        if (WindowShouldClose()) state->terminate = true;
+        handle_input(state);
+        emu_runFrame(state);
+        BeginDrawing();
         RenderFrame(state, state->ppu->pixel_data);
-        // RenderFrame(state, state->gpu->frame_buffer);
-        // renderVRAM(state);
+        EndDrawing();
     }
     CloseWindow();
 }
@@ -50,6 +72,7 @@ void emu_init(GameBoyState* state) {
     cpu_init(state->cpu);
     timer_init(state->mmu);
     ppu_init(state->ppu, state->mmu);
+    joypad_init(state->joypad);
     state->mmu->gb = state;
 }
 

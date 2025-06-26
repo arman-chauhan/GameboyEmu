@@ -44,6 +44,8 @@ void ppu_init(ppu_t* ppu, mmu_t* mmu) {
     ppu->x_pos = 0;
     ppu->fetcher.spriteToFetch = NULL;
     ppu->state = PPU_MODE_OAM_SCAN;
+    ppu->fetcher.sprite_fifo.size = 0;
+    ppu->fetcher.bg_fifo.size = 0;
 }
 
 static void eval_ly_lyc(ppu_t* ppu) {

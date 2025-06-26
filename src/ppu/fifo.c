@@ -48,13 +48,15 @@ pixel_t fifo_pop(fifo_t *fifo) {
     return pixel;
 }
 
-void fifo_clear(fifo_t *fifo) {
-    pixel_t *current = fifo->head;
-    while (current != NULL) {
-        pixel_t *next = current->next;
-        free(current);
-        current = next;
+void fifo_clear(fifo_t* fifo) {
+    if (fifo->size > 0) {
+        pixel_t* current = fifo->head;
+        while (current != NULL) {
+            pixel_t* next = current->next;
+            free(current);
+            current = next;
+        }
+        fifo->head = fifo->tail = NULL;
+        fifo->size = 0;
     }
-    fifo->head = fifo->tail = NULL;
-    fifo->size = 0;
 }
